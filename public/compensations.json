@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "extractedAt": "2025-10-04T15:20:51.907Z",
+    "totalCompensations": 6,
+    "sourceFile": "medicamente_cnas.csv",
+    "columnName": "Lista de compensare"
+  },
+  "compensations": [
+    "A",
+    "B",
+    "C1",
+    "C2",
+    "C3",
+    "D"
+  ]
+}

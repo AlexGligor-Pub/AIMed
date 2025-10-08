@@ -1,0 +1,727 @@
+.medicines-container {
+  padding: 2rem;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 300px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #646cff;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(100, 108, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #535bf2;
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.2);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.column-toggle-button {
+  padding: 0.75rem;
+  background: rgba(100, 108, 255, 0.1);
+  border: 2px solid #646cff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #646cff;
+  transition: all 0.3s ease;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(100, 108, 255, 0.1);
+  white-space: nowrap;
+}
+
+.column-toggle-button:hover {
+  background: #646cff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+}
+
+.substance-filter-toggle-button {
+  padding: 0.75rem;
+  background: rgba(100, 108, 255, 0.1);
+  border: 2px solid #646cff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #646cff;
+  transition: all 0.3s ease;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(100, 108, 255, 0.1);
+  white-space: nowrap;
+}
+
+.substance-filter-toggle-button:hover {
+  background: #646cff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+}
+
+.clear-all-filters-button {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 99, 99, 0.1);
+  border: 2px solid #ff6363;
+  border-radius: 8px;
+  color: #ff6363;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.clear-all-filters-button:hover {
+  background: #ff6363;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 99, 99, 0.3);
+}
+
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #646cff;
+  font-weight: 500;
+}
+
+.items-per-page-select {
+  padding: 0.5rem;
+  border: 2px solid #646cff;
+  border-radius: 6px;
+  background: white;
+  color: #646cff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.items-per-page-select:hover {
+  border-color: #535bf2;
+}
+
+.table-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  margin-bottom: 2rem;
+  height: 520px; /* Înălțime calculată pentru ~10 rânduri */
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.medicines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.medicines-table th {
+  background: linear-gradient(135deg, #646cff, #535bf2);
+  color: white;
+  padding: 1rem 0.5rem;
+  text-align: left;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.row-number-header {
+  background: linear-gradient(135deg, #535bf2, #4c52d4) !important;
+  text-align: center !important;
+  font-weight: 700 !important;
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+.sortable-header {
+  cursor: pointer !important;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.sortable-header:hover {
+  background: linear-gradient(135deg, #535bf2, #4c52d4) !important;
+  background: rgba(83, 91, 242, 0.1) !important;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.sort-indicators {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+
+.sort-arrow {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  padding: 0.1rem 0.3rem;
+  min-width: 16px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.sort-arrow.asc {
+  background: rgba(46, 204, 113, 0.8);
+}
+
+.sort-arrow.desc {
+  background: rgba(231, 76, 60, 0.8);
+}
+
+.medicines-table td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid rgba(100, 108, 255, 0.1);
+  vertical-align: top;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.row-number {
+  text-align: center;
+  font-weight: 600;
+  color: #646cff;
+  background: rgba(100, 108, 255, 0.05);
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+.medicines-table tbody tr:hover {
+  background: rgba(100, 108, 255, 0.05);
+}
+
+/* Scrollbar personalizat */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: rgba(100, 108, 255, 0.1);
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: rgba(100, 108, 255, 0.3);
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 108, 255, 0.5);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination-button {
+  padding: 0.75rem 1.5rem;
+  background: rgba(100, 108, 255, 0.1);
+  border: 2px solid #646cff;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #646cff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.2rem;
+  color: #646cff;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+/* Modal pentru selecția coloanelor */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #646cff, #535bf2);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.modal-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.column-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.column-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(100, 108, 255, 0.05);
+  border: 1px solid rgba(100, 108, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.column-checkbox:hover {
+  background: rgba(100, 108, 255, 0.1);
+  border-color: rgba(100, 108, 255, 0.2);
+}
+
+.column-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #646cff;
+  cursor: pointer;
+}
+
+.column-checkbox span {
+  color: #333;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(100, 108, 255, 0.1);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-button {
+  padding: 0.75rem 1.5rem;
+  background: #646cff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-button:hover {
+  background: #535bf2;
+  transform: translateY(-1px);
+}
+
+/* Template pentru modalele de filtre */
+.filter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+}
+
+.filter-modal-section {
+  position: relative;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  z-index: 2001;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.filter-modal-header {
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #646cff, #535bf2);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-modal-header-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.close-filters-btn {
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-filters-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.filter-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.clear-filters-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.clear-filters-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.filter-modal-content {
+  padding: 1.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.filter-search-container {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filter-search-input {
+  padding: 0.75rem 1rem;
+  border: 2px solid #646cff;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  flex: 1;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(100, 108, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.filter-search-input:focus {
+  outline: none;
+  border-color: #535bf2;
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.2);
+}
+
+.filter-search-input::placeholder {
+  color: #999;
+}
+
+.filter-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.9rem;
+  background: rgba(100, 108, 255, 0.05);
+  border: 1px solid rgba(100, 108, 255, 0.1);
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.filter-option:hover {
+  background: rgba(100, 108, 255, 0.1);
+}
+
+.filter-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #646cff;
+  cursor: pointer;
+}
+
+.filter-option span {
+  color: #333;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.filter-more {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+  padding: 0.75rem;
+  text-align: center;
+  background: rgba(100, 108, 255, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(100, 108, 255, 0.1);
+}
+
+.filter-no-results {
+  font-size: 0.9rem;
+  color: #666;
+  padding: 1rem;
+  text-align: center;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  font-style: italic;
+}
+
+/* Stiluri pentru butonul inline de ștergere filtre */
+.clear-filters-inline-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.clear-filters-inline-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Meniu contextual */
+.context-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: transparent;
+}
+
+.context-menu {
+  position: fixed;
+  background: #2c2c2c;
+  border: 1px solid #555;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  min-width: 200px;
+  padding: 8px 0;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  color: #fff;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.context-menu-item:hover {
+  background-color: #404040;
+}
+
+.context-menu-icon {
+  margin-right: 12px;
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .medicines-container {
+    padding: 1rem;
+  }
+  
+  .medicines-table {
+    font-size: 0.8rem;
+  }
+  
+  .medicines-table th,
+  .medicines-table td {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .table-container {
+    height: 420px; /* Înălțime mai mică pe mobile pentru ~10 rânduri */
+  }
+  
+  .pagination {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem;
+  }
+}
