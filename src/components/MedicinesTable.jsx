@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import './MedicinesTable.css'
 
-const MedicinesTable = () => {
+const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCategories = [], onCategoryChange = () => {} }) => {
   const [medicines, setMedicines] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -30,7 +30,7 @@ const MedicinesTable = () => {
     try {
       setLoading(true)
       console.log('🔄 Încerc să încarc fișierul CSV...')
-      const response = await fetch('/medicamente_cnas.csv')
+      const response = await fetch('/medicamente_cu_categorii.csv')
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -202,6 +202,29 @@ const MedicinesTable = () => {
   const filteredMedicines = useMemo(() => {
     let filtered = medicines
 
+    // Aplică filtrarea pe bază de categorie de vârstă folosind coloana CategorieVarsta
+    if (ageCategory && ageCategory !== 'toate') {
+      filtered = filtered.filter(medicine => {
+        const categorieVarsta = medicine['CategorieVarsta'] || ''
+        
+        // Mapare între ID-ul categoriei și valoarea din CSV
+        const categoryMap = {
+          'copii': 'Copii',
+          'adolescenti': 'Adolescenți',
+          'tineri': 'Tineri',
+          'adulti': 'Adulți',
+          'batrani': 'Bătrâni'
+        }
+        
+        const categoryValue = categoryMap[ageCategory]
+        if (!categoryValue) return false
+        
+        // Verifică dacă categoria selectată apare în CategorieVarsta
+        // (poate fi "Copii", "Adolescenți+Tineri", "Adulți+Bătrâni", etc.)
+        return categorieVarsta.includes(categoryValue)
+      })
+    }
+
     // Aplică căutarea globală
     if (searchTerm) {
       filtered = filtered.filter(medicine => 
@@ -223,7 +246,7 @@ const MedicinesTable = () => {
     })
 
     return filtered
-  }, [medicines, searchTerm, filters])
+  }, [medicines, searchTerm, filters, ageCategory, ageCategoryData])
 
   // Memoize sorted data
   const sortedMedicines = useMemo(() => {
@@ -377,6 +400,7 @@ const MedicinesTable = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
+        
         <button 
           className="column-toggle-button"
           onClick={() => setShowColumnModal(true)}
@@ -415,6 +439,28 @@ const MedicinesTable = () => {
           </select>
         </div>
       </div>
+
+      {/* Categorii de vârstă vizibile */}
+      {ageCategories.length > 0 && (
+        <div className="age-categories-section">
+          <h3 className="categories-title">📋 Categorii de vârstă:</h3>
+          <div className="age-categories-buttons">
+            {ageCategories.map(category => (
+              <button
+                key={category.id}
+                className={`age-category-btn ${ageCategory === category.id ? 'active' : ''}`}
+                onClick={() => onCategoryChange(category.id)}
+              >
+                <span className="category-icon">{category.icon}</span>
+                <div className="category-info">
+                  <span className="category-label">{category.label}</span>
+                  <span className="category-description">{category.description}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Template pentru modalele de filtre */}
       {Object.entries(showFilters).map(([filterKey, isVisible]) => {
