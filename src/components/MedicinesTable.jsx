@@ -29,14 +29,108 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
 
   // Categorii de compensare - ordonate după procentul de compensare
   const compensationCategories = [
-    { id: 'toate', label: 'Toate', percentage: 'Toate', description: '', isSpecial: true },
-    { id: 'C1', label: 'C1', percentage: '100% compensare', description: 'C1' },
-    { id: 'C2', label: 'C2', percentage: '100% compensare', description: 'C2' },
-    { id: 'C3', label: 'C3', percentage: '100% compensare', description: 'C3' },
-    { id: 'A', label: 'A', percentage: '90% compensare', description: 'A' },
-    { id: 'B', label: 'B', percentage: '50% compensare', description: 'B' },
-    { id: 'D', label: 'D', percentage: '20% compensare', description: 'D' }
+    { 
+      id: 'toate', 
+      label: 'Toate', 
+      percentage: 'Toate', 
+      description: '', 
+      isSpecial: true, 
+      pieValue: null,
+      tooltip: 'Toate categoriile de compensare'
+    },
+    { 
+      id: 'C1', 
+      label: 'C1', 
+      percentage: '100%', 
+      description: 'C1', 
+      pieValue: 100,
+      tooltip: 'C – procentul de compensare a medicamentelor corespunzătoare denumirilor comune internaționale (DCI) prevăzute în secțiunea C1 este de 100% din prețul de referință pentru respectiva clasă de medicamente'
+    },
+    { 
+      id: 'C2', 
+      label: 'C2', 
+      percentage: '100%', 
+      description: 'C2', 
+      pieValue: 100,
+      tooltip: 'C – procentul de compensare a medicamentelor corespunzătoare denumirilor comune internaționale (DCI) prevăzute în secțiunea C2 este de 100% din prețul de decontare (include TVA) sau din prețul cu ridicata de decontare (la care se adaugă TVA) pentru respectiva clasă de medicamente'
+    },
+    { 
+      id: 'C3', 
+      label: 'C3', 
+      percentage: '100%', 
+      description: 'C3', 
+      pieValue: 100,
+      tooltip: 'C – procentul de compensare a medicamentelor corespunzătoare denumirilor comune internaționale (DCI) prevăzute în secțiunea C3 este de 100% din prețul de referință pentru respectiva clasă de medicamente'
+    },
+    { 
+      id: 'A', 
+      label: 'A', 
+      percentage: '90%', 
+      description: 'A', 
+      pieValue: 90,
+      tooltip: 'A – procentul de compensare a medicamentelor corespunzătoare denumirilor comune internaționale (DCI) prevăzute în sublista A este de 90% din prețul de referință pentru respectiva clasă de medicamente'
+    },
+    { 
+      id: 'B', 
+      label: 'B', 
+      percentage: '50%', 
+      description: 'B', 
+      pieValue: 50,
+      tooltip: 'B – procentul de compensare a medicamentelor corespunzătoare denumirilor comune internaționale (DCI) prevăzute în sublista B este de 50% din prețul de referință pentru respectiva clasă de medicamente'
+    },
+    { 
+      id: 'D', 
+      label: 'D', 
+      percentage: '20%', 
+      description: 'D', 
+      pieValue: 20,
+      tooltip: 'D – procentul de compensare a medicamentelor corespunzătoare denumirilor comune internaționale (DCI) prevăzute în sublista D este de 20% din prețul de referință pentru respectiva clasă de medicamente'
+    }
   ]
+
+  // Funcție pentru a genera graficul pie
+  const generatePieChart = (percentage) => {
+    const size = 40
+    const radius = size / 2 - 2
+    const circumference = 2 * Math.PI * radius
+    const strokeDasharray = circumference
+    const strokeDashoffset = circumference - (percentage / 100) * circumference
+    
+    // Culori diferite pentru fiecare procentaj
+    const getColor = (percent) => {
+      if (percent === 100) return '#10b981' // Verde pentru 100%
+      if (percent === 90) return '#3b82f6'  // Albastru pentru 90%
+      if (percent === 50) return '#f59e0b'  // Portocaliu pentru 50%
+      if (percent === 20) return '#ef4444'  // Roșu pentru 20%
+      return '#6b7280' // Gri pentru alte valori
+    }
+    
+    return (
+      <svg width={size} height={size} className="pie-chart">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#e5e7eb"
+          strokeWidth="3"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={getColor(percentage)}
+          strokeWidth="3"
+          strokeDasharray={strokeDasharray}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+        />
+      </svg>
+    )
+  }
 
   // Funcție pentru parsing CSV corect (gestionează ghilimele)
   const parseCSVLine = (line) => {
@@ -530,6 +624,7 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
                       key={category.id}
                       className={`category-btn compensation-category-btn ${selectedCompensationCategory === category.id ? 'active' : ''}`}
                       onClick={() => setSelectedCompensationCategory(category.id)}
+                      data-tooltip={category.tooltip}
                     >
                       <div className="category-info">
                         {category.isSpecial ? (
@@ -541,6 +636,11 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
                           </>
                         )}
                       </div>
+                      {category.pieValue && (
+                        <div className="pie-chart-container">
+                          {generatePieChart(category.pieValue)}
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>

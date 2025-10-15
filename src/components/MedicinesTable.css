@@ -165,10 +165,91 @@
 /* Butoane pentru categorii de compensare - identice cu cele de vârstă */
 .compensation-category-btn {
   min-width: 100%;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .compensation-category-btn.active .category-description {
   color: rgba(255, 255, 255, 0.9);
+}
+
+/* Stiluri pentru graficele pie */
+.pie-chart-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.pie-chart {
+  transition: transform 0.3s ease;
+}
+
+.compensation-category-btn:hover .pie-chart {
+  transform: scale(1.1);
+}
+
+.compensation-category-btn.active .pie-chart {
+  filter: brightness(1.2);
+}
+
+/* Stiluri pentru tooltip-uri custom cu delay */
+.compensation-category-btn {
+  position: relative;
+}
+
+.compensation-category-btn[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  background: #000000;
+  color: #ffffff;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  max-width: 350px;
+  white-space: normal;
+  text-align: left;
+  z-index: 99999;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  border: 2px solid #333333;
+  pointer-events: none;
+  margin-left: 0.75rem;
+  opacity: 0;
+  animation: tooltipFadeInRight 0.3s ease-in-out 1.5s forwards;
+}
+
+.compensation-category-btn[data-tooltip]:hover::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  border: 8px solid transparent;
+  border-right-color: #000000;
+  z-index: 99999;
+  pointer-events: none;
+  margin-left: -0.75rem;
+  opacity: 0;
+  animation: tooltipFadeInRight 0.3s ease-in-out 1.5s forwards;
+}
+
+@keyframes tooltipFadeInRight {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
 }
 
 .column-toggle-button {
@@ -512,7 +593,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 99999;
   backdrop-filter: blur(8px);
 }
 
