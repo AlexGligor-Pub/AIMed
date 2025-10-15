@@ -41,8 +41,25 @@
   font-weight: 400;
 }
 
-/* Categorii de vârstă vizibile - Professional Design */
-.age-categories-section {
+/* Layout cu două coloane */
+.main-content-layout {
+  display: flex;
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-lg);
+}
+
+.filters-column {
+  flex: 0 0 350px;
+  min-width: 350px;
+}
+
+.table-column {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Categorii combinate - Professional Design */
+.categories-section {
   margin-bottom: var(--spacing-xl);
   padding: var(--spacing-xl);
   background: var(--background-card);
@@ -51,9 +68,9 @@
   animation: slideIn 0.6s ease-out;
 }
 
-.categories-title {
-  margin: 0 0 var(--spacing-lg) 0;
-  font-size: 1.25rem;
+.filter-section-title {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
   display: flex;
@@ -62,37 +79,54 @@
   letter-spacing: -0.01em;
 }
 
-.age-categories-buttons {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: nowrap;
-  /* Eliminăm overflow-x și scrollbar-ul pentru a le face să umple spațiul */
+/* Coloane pentru categorii - afișare verticală */
+.age-categories-column {
+  margin-bottom: var(--spacing-xl);
 }
 
-.age-category-btn {
+.compensation-categories-column {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Grid pentru două coloane de butoane */
+.categories-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.category-btn {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centrează conținutul pe orizontală */
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
+  justify-content: flex-start;
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--background-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
-  flex: 1; /* Face butoanele să se întindă și să umple spațiul */
   white-space: nowrap;
+  width: 100%;
+  text-align: left;
+  min-height: 60px;
 }
 
-.age-category-btn:hover {
+.category-btn:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
+  transform: translateX(4px);
 }
 
-.age-category-btn.active {
+.category-btn.active {
   background: var(--primary-color);
   border-color: var(--primary-color);
   color: white;
+  transform: translateX(4px);
+}
+
+/* Butoane pentru categorii de vârstă */
+.age-category-btn {
+  min-width: 100%;
 }
 
 .age-category-btn.active .category-description {
@@ -100,28 +134,41 @@
 }
 
 .category-icon {
-  font-size: 1.75rem;
-  min-width: 35px;
+  font-size: 1.5rem;
+  min-width: 30px;
   text-align: center;
+  margin-right: var(--spacing-sm);
 }
 
 .category-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 2px;
   text-align: left;
+  flex: 1;
 }
 
 .category-label {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .category-description {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
   font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Butoane pentru categorii de compensare - identice cu cele de vârstă */
+.compensation-category-btn {
+  min-width: 100%;
+}
+
+.compensation-category-btn.active .category-description {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .column-toggle-button {
@@ -221,9 +268,20 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   margin-bottom: 2rem;
-  height: 520px; /* Înălțime calculată pentru ~10 rânduri */
-  overflow-y: auto;
   overflow-x: auto;
+}
+
+/* Înălțime dinamică bazată pe numărul de elemente pe pagină */
+.table-container.items-10 {
+  height: auto;
+  overflow-y: visible;
+}
+
+.table-container.items-50,
+.table-container.items-100,
+.table-container.items-all {
+  height: 520px;
+  overflow-y: auto;
 }
 
 .medicines-table {
@@ -338,6 +396,33 @@
 
 .table-container::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 108, 255, 0.5);
+}
+
+/* Stiluri pentru afișarea bolilor */
+.diseases-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 200px;
+}
+
+.disease-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  background: var(--primary-light);
+  color: var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid var(--primary-light);
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.disease-tag:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .pagination {
@@ -547,19 +632,8 @@
   width: 90%;
   max-height: 80vh;
   z-index: 2001;
-  animation: modalSlideIn 0.3s ease-out;
 }
 
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
 
 .filter-modal-header {
   padding: 1rem 1.5rem;
@@ -742,48 +816,150 @@
   transform: translateY(-1px);
 }
 
-/* Meniu contextual */
-.context-menu-overlay {
+/* Meniu de filtre centrat și interactiv */
+.filter-menu-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1000;
-  background: transparent;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
 }
 
-.context-menu {
-  position: fixed;
-  background: #2c2c2c;
-  border: 1px solid #555;
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  z-index: 1001;
-  min-width: 200px;
-  padding: 8px 0;
+.filter-menu-modal {
+  background: var(--background-card);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
 }
 
-.context-menu-item {
+.filter-menu-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  padding: var(--spacing-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-menu-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  gap: var(--spacing-sm);
+}
+
+.filter-menu-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   cursor: pointer;
-  color: #fff;
-  transition: background-color 0.2s ease;
-  white-space: nowrap;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
-.context-menu-item:hover {
-  background-color: #404040;
+.filter-menu-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
 }
 
-.context-menu-icon {
-  margin-right: 12px;
-  font-size: 16px;
-  width: 20px;
+.filter-menu-content {
+  padding: var(--spacing-xl);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.filter-menu-description {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
   text-align: center;
 }
+
+.filter-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.filter-menu-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background: var(--background-light);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-menu-item:hover {
+  border-color: var(--primary-color);
+  background: rgba(26, 60, 124, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(26, 60, 124, 0.15);
+}
+
+.filter-menu-item:active {
+  transform: translateY(0);
+}
+
+.filter-menu-item-icon {
+  font-size: 2rem;
+  margin-right: var(--spacing-md);
+  min-width: 50px;
+  text-align: center;
+}
+
+.filter-menu-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.filter-menu-item-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.filter-menu-item-count {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.filter-menu-item-arrow {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+.filter-menu-item:hover .filter-menu-item-arrow {
+  transform: translateX(5px);
+}
+
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -800,8 +976,16 @@
     padding: 0.5rem 0.25rem;
   }
   
-  .table-container {
+  .table-container.items-10 {
+    height: auto;
+    overflow-y: visible;
+  }
+  
+  .table-container.items-50,
+  .table-container.items-100,
+  .table-container.items-all {
     height: 420px; /* Înălțime mai mică pe mobile pentru ~10 rânduri */
+    overflow-y: auto;
   }
   
   .pagination {
@@ -818,5 +1002,87 @@
   .modal-body,
   .modal-footer {
     padding: 1rem;
+  }
+
+  /* Responsive pentru layout cu două coloane */
+  .main-content-layout {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+  
+  .filters-column {
+    flex: none;
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .table-column {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Pe mobile, grid-ul devine o singură coloană */
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
+  
+  .category-btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-height: 50px;
+  }
+  
+  .category-icon {
+    font-size: 1.3rem;
+    min-width: 25px;
+    margin-right: var(--spacing-xs);
+  }
+  
+  .category-label {
+    font-size: 0.8rem;
+  }
+  
+  .category-description {
+    font-size: 0.65rem;
+  }
+
+  /* Responsive pentru meniul de filtre */
+  .filter-menu-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .filter-menu-header {
+    padding: var(--spacing-lg);
+  }
+
+  .filter-menu-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .filter-menu-content {
+    padding: var(--spacing-lg);
+  }
+
+  .filter-menu-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .filter-menu-item {
+    padding: var(--spacing-md);
+  }
+
+  .filter-menu-item-icon {
+    font-size: 1.5rem;
+    min-width: 40px;
+  }
+
+  .filter-menu-item-title {
+    font-size: 0.9rem;
+  }
+
+  .filter-menu-item-count {
+    font-size: 0.8rem;
   }
 }

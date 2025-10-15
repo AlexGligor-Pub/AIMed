@@ -16,8 +16,10 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
   const [showFilters, setShowFilters] = useState({})
   const [showContextMenu, setShowContextMenu] = useState(false)
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
+  const [diseases, setDiseases] = useState({})
+  const [selectedCompensationCategory, setSelectedCompensationCategory] = useState('toate')
 
-  // Primele 4 coloane afișate implicit
+  // Primele 4 coloane afișate implicit (fără Coduri_Boli)
   const defaultVisibleColumns = [
     'Denumire medicament',
     'Substanta activa', 
@@ -25,12 +27,70 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
     'Cod medicament'
   ]
 
+  // Categorii de compensare
+  const compensationCategories = [
+    { id: 'toate', label: 'Toate'},
+    { id: 'A', label: 'A', percentage: '', description: '90% compensare' },
+    { id: 'B', label: 'B', percentage: '', description: '50% compensare' },
+    { id: 'C1', label: 'C1', percentage: '', description: '100% compensare' },
+    { id: 'C2', label: 'C2', percentage: '', description: '100% compensare' },
+    { id: 'C3', label: 'C3', percentage: '', description: '100% compensare' },
+    { id: 'D', label: 'D', percentage: '', description: '20% compensare' }
+  ]
+
+  // Funcție pentru parsing CSV corect (gestionează ghilimele)
+  const parseCSVLine = (line) => {
+    const values = []
+    let currentValue = ''
+    let insideQuotes = false
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i]
+      
+      if (char === '"') {
+        insideQuotes = !insideQuotes
+      } else if (char === ',' && !insideQuotes) {
+        values.push(currentValue.trim())
+        currentValue = ''
+      } else {
+        currentValue += char
+      }
+    }
+    values.push(currentValue.trim())
+    return values
+  }
+
+  // Funcție pentru încărcarea bolilor
+  const fetchDiseases = async () => {
+    try {
+      const response = await fetch('/coduri_boala.csv')
+      const csvText = await response.text()
+      const lines = csvText.split('\n')
+      const diseasesMap = {}
+      
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim()
+        if (line) {
+          const values = parseCSVLine(line)
+          if (values.length >= 2) {
+            diseasesMap[values[0]] = values[1]
+          }
+        }
+      }
+      
+      setDiseases(diseasesMap)
+      console.log(`✅ Încărcate ${Object.keys(diseasesMap).length} boli`)
+    } catch (error) {
+      console.error('❌ Eroare la încărcarea bolilor:', error)
+    }
+  }
+
   // Funcție pentru încărcarea medicamentelor
   const fetchMedicines = async () => {
     try {
       setLoading(true)
       console.log('🔄 Încerc să încarc fișierul CSV...')
-      const response = await fetch('/medicamente_cu_categorii.csv')
+      const response = await fetch('/medicamente_cu_boli_COMPLET.csv')
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -40,13 +100,13 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
       console.log('✅ CSV încărcat cu succes, încep procesarea...')
       
       const lines = csvText.split('\n')
-      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
+      const headers = parseCSVLine(lines[0])
       
       const medicinesData = []
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim()
         if (line) {
-          const values = line.split(',').map(v => v.trim().replace(/"/g, ''))
+          const values = parseCSVLine(line)
           const medicine = {}
           headers.forEach((header, index) => {
             medicine[header] = values[index] || ''
@@ -56,6 +116,7 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
       }
       
       console.log(`✅ Procesat cu succes: ${medicinesData.length} medicamente`)
+      console.log('📊 Exemplu medicament:', medicinesData[0])
       setMedicines(medicinesData)
       setError(null)
       setLoading(false)
@@ -157,9 +218,23 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
 
   // useEffect pentru încărcarea inițială
   useEffect(() => {
+    fetchDiseases()
     fetchMedicines()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Funcție pentru afișarea bolilor asociate unui medicament
+  const getDiseasesForMedicine = (coduriBoli) => {
+    if (!coduriBoli || !diseases || Object.keys(diseases).length === 0) {
+      return []
+    }
+    
+    const coduri = coduriBoli.replace(/"/g, '').split(',').map(cod => cod.trim())
+    return coduri.map(cod => ({
+      cod: cod,
+      nume: diseases[cod] || `Boală necunoscută (${cod})`
+    })).filter(disease => disease.cod)
+  }
 
   const handleSort = useCallback((key) => {
     let direction = 'asc'
@@ -225,6 +300,14 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
       })
     }
 
+    // Aplică filtrarea pe bază de categorie de compensare folosind coloana Lista de compensare
+    if (selectedCompensationCategory && selectedCompensationCategory !== 'toate') {
+      filtered = filtered.filter(medicine => {
+        const listaCompensare = medicine['Lista de compensare'] || ''
+        return listaCompensare.includes(selectedCompensationCategory)
+      })
+    }
+
     // Aplică căutarea globală
     if (searchTerm) {
       filtered = filtered.filter(medicine => 
@@ -246,7 +329,7 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
     })
 
     return filtered
-  }, [medicines, searchTerm, filters, ageCategory, ageCategoryData])
+  }, [medicines, searchTerm, filters, ageCategory, ageCategoryData, selectedCompensationCategory])
 
   // Memoize sorted data
   const sortedMedicines = useMemo(() => {
@@ -440,27 +523,145 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
         </div>
       </div>
 
-      {/* Categorii de vârstă vizibile */}
-      {ageCategories.length > 0 && (
-        <div className="age-categories-section">
-          <h3 className="categories-title">📋 Categorii de vârstă:</h3>
-          <div className="age-categories-buttons">
-            {ageCategories.map(category => (
-              <button
-                key={category.id}
-                className={`age-category-btn ${ageCategory === category.id ? 'active' : ''}`}
-                onClick={() => onCategoryChange(category.id)}
-              >
-                <span className="category-icon">{category.icon}</span>
-                <div className="category-info">
-                  <span className="category-label">{category.label}</span>
-                  <span className="category-description">{category.description}</span>
+      {/* Layout cu două coloane */}
+      <div className="main-content-layout">
+        {/* Coloana stângă - Filtre */}
+        <div className="filters-column">
+          {/* Categorii de vârstă și compensare */}
+          {ageCategories.length > 0 && (
+            <div className="categories-section">
+              {/* Categorii de vârstă */}
+              <div className="age-categories-column">
+                <h4 className="filter-section-title">📋 Categorii de vârstă</h4>
+                <div className="categories-grid">
+                  {ageCategories.map(category => (
+                    <button
+                      key={category.id}
+                      className={`category-btn age-category-btn ${ageCategory === category.id ? 'active' : ''}`}
+                      onClick={() => onCategoryChange(category.id)}
+                    >
+                      <span className="category-icon">{category.icon}</span>
+                      <div className="category-info">
+                        <span className="category-label">{category.label}</span>
+                        <span className="category-description">{category.description}</span>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-              </button>
-            ))}
-          </div>
+              </div>
+              
+              {/* Categorii de compensare */}
+              <div className="compensation-categories-column">
+                <h4 className="filter-section-title">💰 Categorii de compensare</h4>
+                <div className="categories-grid">
+                  {compensationCategories.map(category => (
+                    <button
+                      key={category.id}
+                      className={`category-btn compensation-category-btn ${selectedCompensationCategory === category.id ? 'active' : ''}`}
+                      onClick={() => setSelectedCompensationCategory(category.id)}
+                    >
+                      <div className="category-info">
+                        <span className="category-label">{category.label}</span>
+                        <span className="category-description">{category.description}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Coloana dreaptă - Tabelul de medicamente */}
+        <div className="table-column">
+          <div className={`table-container items-${itemsPerPage}`}>
+            <table className="medicines-table">
+              <thead>
+                <tr>
+                  <th className="row-number-header">#</th>
+                  {headers.map((header, index) => (
+                    <th 
+                      key={index} 
+                      className="sortable-header"
+                      onClick={() => handleSort(header)}
+                    >
+                      <div className="header-content">
+                        <span>{header}</span>
+                        <div className="sort-indicators">
+                          {sortConfig.key === header && (
+                            <span className={`sort-arrow ${sortConfig.direction}`}>
+                              {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {currentMedicines.map((medicine, index) => (
+                  <tr key={index}>
+                    <td className="row-number">
+                      {itemsPerPage === 'All' 
+                        ? startIndex + index + 1 
+                        : (currentPage - 1) * itemsPerPage + index + 1
+                      }
+                    </td>
+                    {headers.map((header, headerIndex) => (
+                      <td key={headerIndex}>
+                        {header === 'Coduri_Boli' ? (
+                          <div className="diseases-cell">
+                            {getDiseasesForMedicine(medicine[header]).map((disease, idx) => (
+                              <span key={idx} className="disease-tag" title={`${disease.cod}: ${disease.nume}`}>
+                                {disease.cod}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          medicine[header]
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {itemsPerPage !== 'All' && (
+            <div className="pagination">
+              <button 
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="pagination-button"
+              >
+                Anterior
+              </button>
+              
+              <span className="pagination-info">
+                {currentPage}/{totalPages}
+              </span>
+              
+              <button 
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="pagination-button"
+              >
+                Următor
+              </button>
+            </div>
+          )}
+
+          {itemsPerPage === 'All' && (
+            <div className="pagination">
+              <span className="pagination-info">
+                Afișate toate {sortedMedicines.length} elemente
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Template pentru modalele de filtre */}
       {Object.entries(showFilters).map(([filterKey, isVisible]) => {
@@ -525,101 +726,43 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
         )
       })}
 
-      {/* Meniu contextual */}
+      {/* Meniu de filtre centrat */}
       {showContextMenu && (
-        <div className="context-menu-overlay" onClick={handleContextMenuClose}>
-          <div 
-            className="context-menu"
-            style={{
-              left: contextMenuPosition.x,
-              top: contextMenuPosition.y
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {Object.keys(filters).map(column => (
-              <div key={column} className="context-menu-item" onClick={() => handleFilterClick(column)}>
-                <span className="context-menu-icon">🔬</span>
-                <span>{column}</span>
+        <div className="filter-menu-overlay" onClick={handleContextMenuClose}>
+          <div className="filter-menu-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="filter-menu-header">
+              <h3>🔬 Meniu Filtre</h3>
+              <button className="filter-menu-close" onClick={handleContextMenuClose}>
+                ✕
+              </button>
+            </div>
+            <div className="filter-menu-content">
+              <p className="filter-menu-description">
+                Selectează o coloană pentru a filtra medicamentele:
+              </p>
+              <div className="filter-menu-grid">
+                {Object.keys(filters).map(column => (
+                  <div 
+                    key={column} 
+                    className="filter-menu-item" 
+                    onClick={() => handleFilterClick(column)}
+                  >
+                    <div className="filter-menu-item-icon">🔬</div>
+                    <div className="filter-menu-item-content">
+                      <span className="filter-menu-item-title">{column}</span>
+                      <span className="filter-menu-item-count">
+                        {Object.keys(filters[column] || {}).length} opțiuni
+                      </span>
+                    </div>
+                    <div className="filter-menu-item-arrow">→</div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       )}
 
-      <div className="table-container">
-        <table className="medicines-table">
-          <thead>
-            <tr>
-              <th className="row-number-header">#</th>
-              {headers.map((header, index) => (
-                <th 
-                  key={index} 
-                  className="sortable-header"
-                  onClick={() => handleSort(header)}
-                >
-                  <div className="header-content">
-                    <span>{header}</span>
-                    <div className="sort-indicators">
-                      {sortConfig.key === header && (
-                        <span className={`sort-arrow ${sortConfig.direction}`}>
-                          {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {currentMedicines.map((medicine, index) => (
-              <tr key={index}>
-                <td className="row-number">
-                  {itemsPerPage === 'All' 
-                    ? startIndex + index + 1 
-                    : (currentPage - 1) * itemsPerPage + index + 1
-                  }
-                </td>
-                {headers.map((header, headerIndex) => (
-                  <td key={headerIndex}>{medicine[header]}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {itemsPerPage !== 'All' && (
-        <div className="pagination">
-          <button 
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="pagination-button"
-          >
-            Anterior
-          </button>
-          
-          <span className="pagination-info">
-            {currentPage}/{totalPages}
-          </span>
-          
-          <button 
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="pagination-button"
-          >
-            Următor
-          </button>
-        </div>
-      )}
-
-      {itemsPerPage === 'All' && (
-        <div className="pagination">
-          <span className="pagination-info">
-            Afișate toate {sortedMedicines.length} elemente
-          </span>
-        </div>
-      )}
 
       {/* Modal pentru selecția coloanelor */}
       {showColumnModal && (

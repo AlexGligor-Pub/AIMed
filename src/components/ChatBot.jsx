@@ -4,7 +4,7 @@ import './ChatBot.css'
 const ChatBot = ({ medicinesData = [] }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Bună! Sunt asistentul tău pentru medicamente CNAS. Îți pot oferi informații despre medicamente, prețuri, substanțe active, liste de compensare și multe altele. Cu ce te pot ajuta?' }
+    { role: 'assistant', content: 'Bună! Sunt asistentul tău medical. Descrie-mi simptomele sau starea pacientului și îți voi recomanda medicamentele potrivite din lista CNAS. Cu ce te pot ajuta?' }
   ])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -30,25 +30,60 @@ const ChatBot = ({ medicinesData = [] }) => {
     setIsLoading(true)
 
     try {
-      // Creează contextul cu informații despre medicamente
+      // Creează contextul cu informații despre medicamente și codurile de boală
       const medicinesContext = medicinesData.length > 0 
-        ? `\n\nDate despre medicamente disponibile (primele ${medicinesData.length} din baza de date CNAS):\n${JSON.stringify(medicinesData.slice(0, 10), null, 2)}\n\nTotal medicamente în baza de date: ${medicinesData.length}. Răspunde la întrebări despre medicamente pe baza acestor date și cunoștințelor tale generale despre medicamente.`
+        ? `\n\nDate despre medicamente disponibile din baza de date CNAS (${medicinesData.length} medicamente):\n${JSON.stringify(medicinesData.slice(0, 20), null, 2)}\n\nFiecare medicament are asociate coduri de boală în coloana "Coduri_Boli" care indică pentru ce afecțiuni este indicat.`
         : ''
 
       // Adaugă contextul la primul mesaj sistem
       const messagesWithContext = [
         { 
           role: 'system', 
-          content: `Ești un asistent medical inteligent specializat în informații despre medicamente din lista CNAS (Casa Națională de Asigurări de Sănătate) din România. Ajuți utilizatorii să găsească informații despre medicamente, prețuri, substanțe active, liste de compensare și alte detalii relevante.${medicinesContext}\n\nRăspunde întotdeauna în limba română, clar și concis. Dacă un utilizator întreabă despre un medicament specific, încearcă să găsești informația în datele furnizate. Dacă informația nu este disponibilă, oferă sfaturi generale bazate pe cunoștințele tale medicale.` 
+          content: `Ești un asistent medical inteligent specializat în recomandarea medicamentelor din lista CNAS (Casa Națională de Asigurări de Sănătate) din România. 
+
+FUNCȚIONALITATEA TA:
+1. Utilizatorul îți descrie simptomele sau starea unui pacient
+2. Tu analizezi simptomele și identifici afecțiunile posibile
+3. Găsești medicamentele din lista CNAS care au coduri de boală corespunzătoare acelor afecțiuni
+4. Recomanzi medicamentele potrivite cu explicații
+
+${medicinesContext}
+
+IMPORTANT:
+- Analizează simptomele descrise de utilizator
+- Identifică afecțiunile medicale posibile
+- Caută în datele furnizate medicamentele care au coduri de boală corespunzătoare
+- Recomandă medicamentele potrivite cu explicații clare
+- Menționează substanța activă și lista de compensare
+- Răspunde întotdeauna în limba română, clar și concis
+- Dacă nu găsești medicamente specifice, oferă sfaturi generale bazate pe cunoștințele tale medicale` 
         },
         ...newMessages
       ]
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      // Debug: verifică API key-ul
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+      console.log('API Key exists:', !!apiKey)
+      console.log('API Key length:', apiKey ? apiKey.length : 0)
+      console.log('API Key starts with:', apiKey ? apiKey.substring(0, 20) + '...' : 'undefined')
+      console.log('Full API Key:', apiKey)
+      console.log('All env vars:', import.meta.env)
+      
+      // Test de conectivitate
+      console.log('Testing network connectivity...')
+      try {
+        const testResponse = await fetch('https://httpbin.org/get', { method: 'GET' })
+        console.log('Network test successful:', testResponse.status)
+      } catch (testError) {
+        console.error('Network test failed:', testError)
+      }
+      
+      console.log('Making request to OpenAI API through proxy...')
+      const response = await fetch('/api/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
@@ -59,18 +94,47 @@ const ChatBot = ({ medicinesData = [] }) => {
       })
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`)
+        const errorText = await response.text()
+        console.error('API Response Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        })
+        throw new Error(`API Error: ${response.status} - ${response.statusText} - ${errorText}`)
       }
 
       const data = await response.json()
+      console.log('API Response:', data)
       const assistantMessage = data.choices[0].message.content
 
       setMessages([...newMessages, { role: 'assistant', content: assistantMessage }])
     } catch (error) {
       console.error('Error calling OpenAI:', error)
+      console.error('Error type:', typeof error)
+      console.error('Error name:', error.name)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        response: error.response
+      })
+      
+      let errorMessage = 'Ne pare rău, a apărut o eroare la conectarea cu AI. '
+      
+      if (error.message.includes('401')) {
+        errorMessage += 'Eroare de autentificare - API key invalid sau lipsă.'
+      } else if (error.message.includes('429')) {
+        errorMessage += 'Prea multe cereri - încearcă din nou mai târziu.'
+      } else if (error.message.includes('500')) {
+        errorMessage += 'Eroare de server OpenAI.'
+      } else {
+        errorMessage += `Detalii: ${error.message}`
+      }
+      
       setMessages([...newMessages, { 
         role: 'assistant', 
-        content: 'Ne pare rău, a apărut o eroare la conectarea cu AI. Te rog încearcă din nou.' 
+        content: errorMessage
       }])
     } finally {
       setIsLoading(false)
