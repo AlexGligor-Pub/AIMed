@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 // Read CSV file
-const csv = fs.readFileSync('public/medicamente_cnas.csv', 'utf8');
+const csv = fs.readFileSync('public/medicamente_cu_boli_COMPLET.csv', 'utf8');
 const lines = csv.split('\n');
 const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
 

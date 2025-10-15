@@ -17,7 +17,7 @@ function App() {
 
   // Categorii de vârstă (keywords nu mai sunt necesare - folosim coloana CategorieVarsta din CSV)
   const ageCategories = [
-    { id: 'toate', label: 'Toate'},
+    { id: 'toate', label: 'Toate', percentage: 'Toate', description: '', isSpecial: true },
     { id: 'copii', label: 'Copii', icon: '👶', description: '0-12 ani' },
     { id: 'adolescenti', label: 'Adolescenți', icon: '🧒', description: '13-17 ani' },
     { id: 'tineri', label: 'Tineri', icon: '👨', description: '18-35 ani' },

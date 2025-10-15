@@ -10,7 +10,7 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
   const [showColumnModal, setShowColumnModal] = useState(false)
   const [visibleColumns, setVisibleColumns] = useState({})
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+  // Sortare eliminată - nu mai este necesară
   const [filters, setFilters] = useState({})
   const [searchTerms, setSearchTerms] = useState({})
   const [showFilters, setShowFilters] = useState({})
@@ -27,15 +27,15 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
     'Cod medicament'
   ]
 
-  // Categorii de compensare
+  // Categorii de compensare - ordonate după procentul de compensare
   const compensationCategories = [
-    { id: 'toate', label: 'Toate'},
-    { id: 'A', label: 'A', percentage: '', description: '90% compensare' },
-    { id: 'B', label: 'B', percentage: '', description: '50% compensare' },
-    { id: 'C1', label: 'C1', percentage: '', description: '100% compensare' },
-    { id: 'C2', label: 'C2', percentage: '', description: '100% compensare' },
-    { id: 'C3', label: 'C3', percentage: '', description: '100% compensare' },
-    { id: 'D', label: 'D', percentage: '', description: '20% compensare' }
+    { id: 'toate', label: 'Toate', percentage: 'Toate', description: '', isSpecial: true },
+    { id: 'C1', label: 'C1', percentage: '100% compensare', description: 'C1' },
+    { id: 'C2', label: 'C2', percentage: '100% compensare', description: 'C2' },
+    { id: 'C3', label: 'C3', percentage: '100% compensare', description: 'C3' },
+    { id: 'A', label: 'A', percentage: '90% compensare', description: 'A' },
+    { id: 'B', label: 'B', percentage: '50% compensare', description: 'B' },
+    { id: 'D', label: 'D', percentage: '20% compensare', description: 'D' }
   ]
 
   // Funcție pentru parsing CSV corect (gestionează ghilimele)
@@ -236,42 +236,7 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
     })).filter(disease => disease.cod)
   }
 
-  const handleSort = useCallback((key) => {
-    let direction = 'asc'
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc'
-    }
-    setSortConfig({ key, direction })
-  }, [sortConfig])
-
-  const getSortedData = (data) => {
-    if (!sortConfig.key) return data
-
-    return [...data].sort((a, b) => {
-      const aValue = a[sortConfig.key] || ''
-      const bValue = b[sortConfig.key] || ''
-      
-      // Verifică dacă valorile sunt numere
-      const aNum = parseFloat(aValue)
-      const bNum = parseFloat(bValue)
-      
-      if (!isNaN(aNum) && !isNaN(bNum)) {
-        return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum
-      }
-      
-      // Pentru text, face sortare case-insensitive
-      const aStr = aValue.toString().toLowerCase()
-      const bStr = bValue.toString().toLowerCase()
-      
-      if (aStr < bStr) {
-        return sortConfig.direction === 'asc' ? -1 : 1
-      }
-      if (aStr > bStr) {
-        return sortConfig.direction === 'asc' ? 1 : -1
-      }
-      return 0
-    })
-  }
+  // Funcții de sortare eliminate - nu mai sunt necesare
 
   // Memoize filtered data pentru performanță
   const filteredMedicines = useMemo(() => {
@@ -331,10 +296,8 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
     return filtered
   }, [medicines, searchTerm, filters, ageCategory, ageCategoryData, selectedCompensationCategory])
 
-  // Memoize sorted data
-  const sortedMedicines = useMemo(() => {
-    return getSortedData(filteredMedicines)
-  }, [filteredMedicines, sortConfig])
+  // Datele nu mai sunt sortate - se folosesc direct datele filtrate
+  const sortedMedicines = filteredMedicines
 
   // Calculează paginarea
   const totalPages = itemsPerPage === 'All' ? 1 : Math.ceil(sortedMedicines.length / itemsPerPage)
@@ -540,11 +503,19 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
                       className={`category-btn age-category-btn ${ageCategory === category.id ? 'active' : ''}`}
                       onClick={() => onCategoryChange(category.id)}
                     >
-                      <span className="category-icon">{category.icon}</span>
-                      <div className="category-info">
-                        <span className="category-label">{category.label}</span>
-                        <span className="category-description">{category.description}</span>
-                      </div>
+                      {category.isSpecial ? (
+                        <div className="category-info">
+                          <span className="category-label" style={{fontSize: '1rem', fontWeight: '700'}}>{category.percentage}</span>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="category-icon">{category.icon}</span>
+                          <div className="category-info">
+                            <span className="category-label">{category.label}</span>
+                            <span className="category-description">{category.description}</span>
+                          </div>
+                        </>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -561,8 +532,14 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
                       onClick={() => setSelectedCompensationCategory(category.id)}
                     >
                       <div className="category-info">
-                        <span className="category-label">{category.label}</span>
-                        <span className="category-description">{category.description}</span>
+                        {category.isSpecial ? (
+                          <span className="category-label" style={{fontSize: '1rem', fontWeight: '700'}}>{category.percentage}</span>
+                        ) : (
+                          <>
+                            <span className="category-label">{category.percentage}</span>
+                            <span className="category-description">{category.description}</span>
+                          </>
+                        )}
                       </div>
                     </button>
                   ))}
@@ -583,17 +560,9 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
                     <th 
                       key={index} 
                       className="sortable-header"
-                      onClick={() => handleSort(header)}
                     >
                       <div className="header-content">
                         <span>{header}</span>
-                        <div className="sort-indicators">
-                          {sortConfig.key === header && (
-                            <span className={`sort-arrow ${sortConfig.direction}`}>
-                              {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                            </span>
-                          )}
-                        </div>
                       </div>
                     </th>
                   ))}

@@ -1,4 +1,4 @@
-/* Buton Chat - colț dreapta jos */
+/* Buton Chat - colț dreapta jos - Design consistent cu imaginea */
 .chat-button {
   position: fixed;
   bottom: 30px;
@@ -6,12 +6,12 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
   border: none;
   color: white;
   font-size: 28px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(26, 60, 124, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,22 +21,23 @@
 
 .chat-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(26, 60, 124, 0.4);
 }
 
-/* Modal Chat - overlay */
+/* Modal Chat - overlay - Design consistent cu imaginea */
 .chat-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
   animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 
 @keyframes fadeIn {
@@ -48,17 +49,17 @@
   }
 }
 
-/* Modal Chat - container */
+/* Modal Chat - container - Design consistent cu imaginea */
 .chat-modal {
   width: 90%;
   height: 90%;
   max-width: none;
   max-height: none;
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;
 }
 
@@ -73,12 +74,12 @@
   }
 }
 
-/* Header */
+/* Header - Design consistent cu imaginea */
 .chat-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
   color: white;
-  padding: 20px;
-  border-radius: 16px 16px 0 0;
+  padding: 1.5rem;
+  border-radius: 12px 12px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -86,8 +87,10 @@
 
 .chat-header h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.2rem;
   font-weight: 600;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .chat-close-button {
@@ -97,16 +100,18 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  font-size: 20px;
+  font-size: 1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .chat-close-button:hover {
   background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
 
 /* Messages Container */
@@ -129,12 +134,12 @@
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: #667eea;
+  background: #1a3c7c;
   border-radius: 4px;
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-  background: #5568d3;
+  background: #2c5aa0;
 }
 
 /* Messages */
@@ -172,9 +177,10 @@
 }
 
 .chat-message.user .message-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
   color: white;
   border-bottom-right-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .chat-message.assistant .message-content {
@@ -182,6 +188,7 @@
   color: #333;
   border: 1px solid #e0e0e0;
   border-bottom-left-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Loading indicator */
@@ -201,7 +208,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #667eea;
+  background: #1a3c7c;
   animation: typing 1.4s infinite;
 }
 
@@ -248,7 +255,7 @@
 }
 
 .chat-input:focus {
-  border-color: #667eea;
+  border-color: #1a3c7c;
 }
 
 .chat-input:disabled {
@@ -260,7 +267,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
   border: none;
   color: white;
   font-size: 20px;
@@ -274,7 +281,7 @@
 
 .chat-send-button:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(26, 60, 124, 0.4);
 }
 
 .chat-send-button:disabled {
@@ -282,7 +289,7 @@
   cursor: not-allowed;
 }
 
-/* Responsive */
+/* Responsive - Design consistent cu imaginea */
 @media (max-width: 768px) {
   .chat-modal {
     width: 95%;
@@ -301,7 +308,35 @@
     max-width: 85%;
   }
 
+  .chat-header {
+    padding: 1rem;
+  }
+
   .chat-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .chat-close-button {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .chat-messages {
+    padding: 1rem;
+  }
+
+  .chat-input-container {
+    padding: 1rem;
+  }
+
+  .chat-input {
+    font-size: 13px;
+  }
+
+  .chat-send-button {
+    width: 44px;
+    height: 44px;
     font-size: 18px;
   }
 }
