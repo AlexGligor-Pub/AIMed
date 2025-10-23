@@ -693,7 +693,8 @@
 }
 
 .modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
   transform: scale(1.05);
 }
 
@@ -761,6 +762,7 @@
 
 .modal-button:hover {
   background: #2c5aa0;
+  color: white !important;
   transform: translateY(-1px);
 }
 
@@ -1184,7 +1186,7 @@
 .download-selected-products-button {
   padding: 0.5rem 0.75rem;
   background: rgba(26, 60, 124, 0.1);
-  border: 2px solid #1a3c7c;
+  border: 1px solid #1a3c7c;
   border-radius: 6px;
   color: #1a3c7c;
   font-weight: 600;
@@ -1195,18 +1197,17 @@
 }
 
 .download-selected-products-button:hover {
-  background: #1a3c7c;
-  color: white;
+  background: rgba(26, 60, 124, 0.2);
+  border-color: #2c5aa0;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(26, 60, 124, 0.3);
 }
 
 .add-medicine-button {
   padding: 0.5rem 0.75rem;
-  background: rgba(34, 197, 94, 0.1);
-  border: 2px solid #22c55e;
+  background: rgba(26, 60, 124, 0.1);
+  border: 1px solid #1a3c7c;
   border-radius: 6px;
-  color: #22c55e;
+  color: #1a3c7c;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1215,10 +1216,9 @@
 }
 
 .add-medicine-button:hover {
-  background: #22c55e;
-  color: white;
+  background: rgba(26, 60, 124, 0.2);
+  border-color: #2c5aa0;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
 }
 
 .selected-products-list {
@@ -1344,10 +1344,10 @@
 
 .remove-selected-product-button {
   padding: 0.25rem 0.5rem;
-  background: rgba(255, 99, 99, 0.1);
-  border: 1px solid #ff6363;
+  background: rgba(107, 114, 128, 0.1);
+  border: 1px solid #6b7280;
   border-radius: 4px;
-  color: #ff6363;
+  color: #6b7280;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.8rem;
@@ -1362,8 +1362,8 @@
 }
 
 .remove-selected-product-button:hover {
-  background: #ff6363;
-  color: white;
+  background: rgba(107, 114, 128, 0.2);
+  border-color: #4b5563;
   transform: scale(1.1);
 }
 
@@ -1376,10 +1376,10 @@
 
 .plan-medicine-button {
   padding: 0.25rem 0.5rem;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid #22c55e;
+  background: rgba(26, 60, 124, 0.1);
+  border: 1px solid #1a3c7c;
   border-radius: 4px;
-  color: #22c55e;
+  color: #1a3c7c;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.7rem;
@@ -1393,8 +1393,8 @@
 }
 
 .plan-medicine-button:hover {
-  background: #22c55e;
-  color: white;
+  background: rgba(26, 60, 124, 0.2);
+  border-color: #2c5aa0;
   transform: scale(1.05);
 }
 
@@ -1974,16 +1974,23 @@
   gap: 10px;
 }
 
+/* Container pentru butonul de pacient nou */
+.new-patient-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
 .patient-notes-button {
-  background: linear-gradient(135deg, #1a3c7c, #2d5aa0);
-  color: white;
-  border: none;
+  background: rgba(26, 60, 124, 0.15);
+  color: #1a3c7c;
+  border: 1px solid #1a3c7c;
   padding: 12px 20px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(26, 60, 124, 0.3);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -1991,21 +1998,21 @@
 }
 
 .patient-notes-button:hover {
-  background: linear-gradient(135deg, #2d5aa0, #1a3c7c);
+  background: rgba(26, 60, 124, 0.25);
+  border-color: #2c5aa0;
+  color: #1a3c7c;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(26, 60, 124, 0.4);
 }
 
 .doctor-notes-button {
-  background: linear-gradient(135deg, #059669, #10b981);
-  color: white;
-  border: none;
+  background: rgba(26, 60, 124, 0.15);
+  color: #1a3c7c;
+  border: 1px solid #1a3c7c;
   padding: 12px 20px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -2013,9 +2020,32 @@
 }
 
 .doctor-notes-button:hover {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: rgba(26, 60, 124, 0.25);
+  border-color: #2c5aa0;
+  color: #1a3c7c;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
+}
+
+.new-patient-button {
+  background: rgba(26, 60, 124, 0.1);
+  color: #1a3c7c;
+  border: 1px solid #1a3c7c;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.new-patient-button:hover {
+  background: rgba(26, 60, 124, 0.2);
+  border-color: #2c5aa0;
+  color: #1a3c7c;
+  transform: translateY(-2px);
 }
 
 .patient-notes-overlay {
@@ -2041,7 +2071,8 @@
   max-height: 800px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(26, 60, 124, 0.25);
+  border: 2px solid rgba(26, 60, 124, 0.2);
   animation: slideIn 0.3s ease;
 }
 
@@ -2050,8 +2081,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
+  border-bottom: 2px solid rgba(26, 60, 124, 0.2);
+  background: linear-gradient(135deg, rgba(26, 60, 124, 0.1), rgba(44, 90, 160, 0.1));
   border-radius: 12px 12px 0 0;
 }
 
@@ -2063,9 +2094,9 @@
 }
 
 .patient-notes-close {
-  background: #ef4444;
-  color: white;
-  border: none;
+  background: rgba(26, 60, 124, 0.15);
+  color: #1a3c7c;
+  border: 2px solid rgba(26, 60, 124, 0.3);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -2078,7 +2109,9 @@
 }
 
 .patient-notes-close:hover {
-  background: #dc2626;
+  background: rgba(26, 60, 124, 0.25);
+  border-color: #1a3c7c;
+  color: #1a3c7c;
   transform: scale(1.1);
 }
 
@@ -2091,23 +2124,24 @@
   line-height: 1.6;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   resize: none;
-  background: #fafafa;
+  background: rgba(26, 60, 124, 0.05);
   color: #374151;
 }
 
 .patient-notes-textarea::placeholder {
-  color: #9ca3af;
+  color: #64748b;
   font-style: italic;
 }
 
 .patient-notes-textarea:focus {
-  background: white;
+  background: rgba(26, 60, 124, 0.08);
+  border: 2px solid rgba(26, 60, 124, 0.2);
 }
 
 .patient-notes-footer {
   padding: 16px 24px;
-  background: #f1f5f9;
-  border-top: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, rgba(26, 60, 124, 0.08), rgba(44, 90, 160, 0.08));
+  border-top: 2px solid rgba(26, 60, 124, 0.2);
   border-radius: 0 0 12px 12px;
   text-align: center;
 }
@@ -2143,7 +2177,8 @@
   max-height: 800px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(26, 60, 124, 0.25);
+  border: 2px solid rgba(26, 60, 124, 0.2);
   animation: slideIn 0.3s ease;
 }
 
@@ -2152,22 +2187,22 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f0fdf4;
+  border-bottom: 2px solid rgba(26, 60, 124, 0.2);
+  background: linear-gradient(135deg, rgba(26, 60, 124, 0.1), rgba(44, 90, 160, 0.1));
   border-radius: 12px 12px 0 0;
 }
 
 .doctor-notes-header-content h3 {
   margin: 0;
-  color: #059669;
+  color: #1a3c7c;
   font-size: 18px;
   font-weight: 600;
 }
 
 .doctor-notes-close {
-  background: #ef4444;
-  color: white;
-  border: none;
+  background: rgba(26, 60, 124, 0.15);
+  color: #1a3c7c;
+  border: 2px solid rgba(26, 60, 124, 0.3);
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -2180,7 +2215,9 @@
 }
 
 .doctor-notes-close:hover {
-  background: #dc2626;
+  background: rgba(26, 60, 124, 0.25);
+  border-color: #1a3c7c;
+  color: #1a3c7c;
   transform: scale(1.1);
 }
 
@@ -2194,13 +2231,19 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid rgba(26, 60, 124, 0.1);
+  background: linear-gradient(135deg, rgba(26, 60, 124, 0.08), rgba(44, 90, 160, 0.08));
+  border: 2px solid rgba(26, 60, 124, 0.15);
+  border-radius: 12px;
+  margin: 8px;
+  box-shadow: 0 4px 12px rgba(26, 60, 124, 0.1);
 }
 
 .doctor-notes-section-header {
   padding: 16px 24px 8px 24px;
-  background: #f0fdf4;
-  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, rgba(26, 60, 124, 0.12), rgba(44, 90, 160, 0.12));
+  border-bottom: 2px solid rgba(26, 60, 124, 0.2);
+  border-radius: 10px 10px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2208,15 +2251,16 @@
 
 .doctor-notes-section-header h4 {
   margin: 0;
-  color: #059669;
-  font-size: 14px;
-  font-weight: 600;
+  color: #1a3c7c;
+  font-size: 16px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(26, 60, 124, 0.1);
 }
 
 .format-notes-button {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  color: white;
-  border: none;
+  background: rgba(26, 60, 124, 0.1);
+  color: #1a3c7c;
+  border: 1px solid #1a3c7c;
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 12px;
@@ -2229,9 +2273,10 @@
 }
 
 .format-notes-button:hover {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  background: rgba(26, 60, 124, 0.2);
+  border-color: #2c5aa0;
+  color: #1a3c7c;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
 }
 
 .format-notes-button:active {
@@ -2240,50 +2285,59 @@
 
 .doctor-notes-textarea {
   flex: 1;
-  padding: 16px 24px;
+  padding: 20px 24px;
   border: none;
   outline: none;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   resize: none;
-  background: #f9fafb;
+  background: rgba(26, 60, 124, 0.08);
   color: #374151;
+  border-radius: 0 0 10px 10px;
 }
 
 .doctor-notes-textarea::placeholder {
-  color: #9ca3af;
+  color: #64748b;
   font-style: italic;
 }
 
 .doctor-notes-textarea:focus {
-  background: white;
+  background: rgba(26, 60, 124, 0.12);
+  border: 2px solid rgba(26, 60, 124, 0.3);
+  box-shadow: 0 0 0 3px rgba(26, 60, 124, 0.1);
 }
 
 .ai-advice-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: rgba(26, 60, 124, 0.02);
+  border: 1px solid rgba(26, 60, 124, 0.05);
+  border-radius: 8px;
+  margin: 8px;
 }
 
 .ai-advice-section-header {
-  padding: 16px 24px 8px 24px;
-  background: #f1f5f9;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 20px 6px 20px;
+  background: linear-gradient(135deg, rgba(26, 60, 124, 0.03), rgba(44, 90, 160, 0.03));
+  border-bottom: 1px solid rgba(26, 60, 124, 0.08);
+  border-radius: 6px 6px 0 0;
 }
 
 .ai-advice-section-header h4 {
   margin: 0;
-  color: #475569;
-  font-size: 14px;
-  font-weight: 600;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .ai-advice-content {
   flex: 1;
-  padding: 16px 24px;
+  padding: 12px 20px;
   overflow-y: auto;
+  background: rgba(26, 60, 124, 0.01);
+  border-radius: 0 0 6px 6px;
 }
 
 .ai-advice-item {
@@ -2426,15 +2480,15 @@
 
 .doctor-notes-footer {
   padding: 16px 24px;
-  background: #f0fdf4;
-  border-top: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, rgba(26, 60, 124, 0.08), rgba(44, 90, 160, 0.08));
+  border-top: 2px solid rgba(26, 60, 124, 0.2);
   border-radius: 0 0 12px 12px;
   text-align: center;
 }
 
 .doctor-notes-footer p {
   margin: 0;
-  color: #059669;
+  color: #1a3c7c;
   font-size: 14px;
   font-style: italic;
 }
@@ -2450,6 +2504,26 @@
   }
 }
 
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Stiluri pentru modalul de adăugare medicament personalizat */
 .add-medicine-modal-overlay {
   position: fixed;
@@ -2457,97 +2531,120 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 99999;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  animation: fadeIn 0.2s ease-out;
 }
 
 .add-medicine-modal-content {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-width: 500px;
+  border-radius: 20px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  max-width: 480px;
   width: 90%;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 1px solid rgba(26, 60, 124, 0.08);
+  animation: slideInUp 0.3s ease-out;
 }
 
 .add-medicine-modal-header {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
   color: white;
-  padding: 1.5rem;
+  padding: 2rem 2rem 1.5rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-radius: 12px 12px 0 0;
+  border-radius: 20px 20px 0 0;
+  position: relative;
+}
+
+.add-medicine-modal-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
 .add-medicine-modal-header h3 {
   margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
   color: white;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .add-medicine-modal-close {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   font-weight: 500;
+  backdrop-filter: blur(10px);
 }
 
 .add-medicine-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
 }
 
 .add-medicine-modal-body {
-  padding: 1.5rem;
+  padding: 2rem;
   flex: 1;
+  background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
 }
 
 .add-medicine-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .add-medicine-form label {
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
+  color: #1f2937;
   font-size: 1rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
 }
 
 .add-medicine-input {
-  padding: 0.875rem 1.25rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
   font-size: 1rem;
   transition: all 0.3s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: white;
+  background: #ffffff;
+  color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .add-medicine-input:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  border-color: #1a3c7c;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(26, 60, 124, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .add-medicine-input::placeholder {
@@ -2556,45 +2653,223 @@
 }
 
 .add-medicine-modal-footer {
-  padding: 1.5rem;
-  border-top: 1px solid #e0e0e0;
+  padding: 2rem;
+  border-top: 1px solid rgba(26, 60, 124, 0.08);
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
+  background: #ffffff;
+  border-radius: 0 0 20px 20px;
 }
 
 .add-medicine-cancel-button {
-  padding: 0.75rem 1.5rem;
-  background: #f5f5f5;
-  color: #333;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  padding: 0.875rem 2rem;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.95rem;
 }
 
 .add-medicine-cancel-button:hover {
-  background: #e8e8e8;
-  border-color: #ccc;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+  transform: translateY(-1px);
 }
 
 .add-medicine-save-button {
-  padding: 0.75rem 1.5rem;
-  background: #22c55e;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
   color: white;
-  border: 2px solid #22c55e;
-  border-radius: 8px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 4px 12px rgba(26, 60, 124, 0.25);
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.add-medicine-save-button:hover {
+  background: linear-gradient(135deg, #2c5aa0, #1a3c7c);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(26, 60, 124, 0.35);
+}
+
+/* Stiluri pentru modalul de pacient nou */
+.new-patient-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  backdrop-filter: blur(12px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.new-patient-modal-content {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(26, 60, 124, 0.08);
+  animation: slideInUp 0.3s ease-out;
+}
+
+.new-patient-modal-header {
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
+  color: white;
+  padding: 2rem 2rem 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+  position: relative;
+}
+
+.new-patient-modal-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.new-patient-modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.new-patient-modal-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+.new-patient-modal-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}
+
+.new-patient-modal-body {
+  padding: 2rem;
+  flex: 1;
+  background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+}
+
+.new-patient-warning {
+  text-align: center;
+  color: #374151;
+}
+
+.new-patient-warning p {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.new-patient-warning ul {
+  text-align: left;
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  color: #6b7280;
+}
+
+.new-patient-warning li {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.new-patient-warning p:last-child {
+  margin-top: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.new-patient-modal-footer {
+  padding: 2rem;
+  border-top: 1px solid rgba(26, 60, 124, 0.08);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background: #ffffff;
+  border-radius: 0 0 20px 20px;
+}
+
+.new-patient-cancel-button {
+  padding: 0.875rem 2rem;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.95rem;
 }
 
-.add-medicine-save-button:hover {
-  background: #16a34a;
-  border-color: #16a34a;
+.new-patient-cancel-button:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
+}
+
+.new-patient-confirm-button {
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 4px 12px rgba(26, 60, 124, 0.25);
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.new-patient-confirm-button:hover {
+  background: linear-gradient(135deg, #2c5aa0, #1a3c7c);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(26, 60, 124, 0.35);
 }
