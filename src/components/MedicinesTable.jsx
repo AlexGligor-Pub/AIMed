@@ -18,6 +18,16 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
   const [diseases, setDiseases] = useState({})
   const [selectedCompensationCategory, setSelectedCompensationCategory] = useState('toate')
+  const [showPatientNotes, setShowPatientNotes] = useState(false)
+  const [patientNotes, setPatientNotes] = useState('')
+  const [showDoctorNotes, setShowDoctorNotes] = useState(false)
+  const [doctorNotes, setDoctorNotes] = useState('')
+  const [aiAdvice, setAiAdvice] = useState([])
+  const [isLoadingAI, setIsLoadingAI] = useState(false)
+  const [selectedProducts, setSelectedProducts] = useState([])
+  const [showPlanModal, setShowPlanModal] = useState(false)
+  const [selectedMedicineForPlan, setSelectedMedicineForPlan] = useState(null)
+  const [medicinePlans, setMedicinePlans] = useState({})
 
   // Primele 4 coloane afișate implicit (fără Coduri_Boli)
   const defaultVisibleColumns = [
@@ -314,7 +324,121 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
   useEffect(() => {
     fetchDiseases()
     fetchMedicines()
+    // Încarcă notițele salvate din localStorage
+    const savedPatientNotes = localStorage.getItem('patientNotes')
+    if (savedPatientNotes) {
+      setPatientNotes(savedPatientNotes)
+    }
+    
+    const savedDoctorNotes = localStorage.getItem('doctorNotes')
+    if (savedDoctorNotes) {
+      setDoctorNotes(savedDoctorNotes)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Salvează notițele în localStorage când se schimbă
+  useEffect(() => {
+    if (patientNotes !== '') {
+      localStorage.setItem('patientNotes', patientNotes)
+    }
+  }, [patientNotes])
+
+  useEffect(() => {
+    if (doctorNotes !== '') {
+      localStorage.setItem('doctorNotes', doctorNotes)
+    }
+  }, [doctorNotes])
+
+  // Funcția AI Medic - analizează indicațiile pacientului și generează sfaturi
+  const generateAIAdvice = useCallback(async (patientNotesText) => {
+    console.log('🧠 AI: Analizez textul:', patientNotesText)
+    
+    if (!patientNotesText || patientNotesText.trim() === '') {
+      console.log('📝 AI: Text gol, returnez array gol')
+      return []
+    }
+
+    // AI Medic - folosește ChatGPT pentru a genera sfaturi medicale
+    const advice = []
+    
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+      if (!apiKey) {
+        console.error('OpenAI API key not found')
+        return []
+      }
+
+      const response = await fetch('/api/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: `Ești un medic specialist cu experiență vastă. Analizează indicațiile pacientului și oferă 5-6 sfaturi medicale profesionale, concrete și practice.
+
+IMPORTANT:
+- Scrie ca un medic real, natural și familiar
+- Fiecare sfat să fie specific și acționabil
+- Nu folosi template-uri formale
+- Răspunde în limba română
+- Fiecare sfat să fie pe o linie separată, începând cu un emoji relevant
+- Sfaturile să fie bazate pe simptomele/observațiile menționate
+
+Formatul răspunsului:
+🤕 Sfat medical specific
+💊 Alt sfat medical
+🔍 Următorul sfat
+etc.`
+            },
+            {
+              role: 'user',
+              content: `Indicațiile pacientului: "${patientNotesText}"`
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        })
+      })
+
+      if (!response.ok) {
+        console.error('OpenAI API Error:', response.status, response.statusText)
+        return []
+      }
+
+      const data = await response.json()
+      const aiResponse = data.choices[0].message.content
+      
+      // Parsează răspunsul AI în sfaturi individuale
+      const lines = aiResponse.split('\n').filter(line => line.trim())
+      lines.forEach(line => {
+        const trimmedLine = line.trim()
+        if (trimmedLine && (trimmedLine.includes('🤕') || trimmedLine.includes('💊') || trimmedLine.includes('🔍') || trimmedLine.includes('🌡️') || trimmedLine.includes('🩺') || trimmedLine.includes('⚠️') || trimmedLine.includes('📋') || trimmedLine.includes('🔄') || trimmedLine.includes('📊') || trimmedLine.includes('💡') || trimmedLine.includes('🦠') || trimmedLine.includes('🍯') || trimmedLine.includes('🥗') || trimmedLine.includes('😴') || trimmedLine.includes('🌙') || trimmedLine.includes('🤢') || trimmedLine.includes('🫁') || trimmedLine.includes('💨') || trimmedLine.includes('🤧') || trimmedLine.includes('⏰') || trimmedLine.includes('🔗'))) {
+          const icon = trimmedLine.charAt(0)
+          const text = trimmedLine.substring(1).trim()
+          if (text) {
+            advice.push({ icon, text })
+          }
+        }
+      })
+
+    } catch (error) {
+      console.error('Error calling OpenAI for medical advice:', error)
+    }
+
+    console.log('✅ AI: Sfaturi finale generate:', advice.slice(0, 6))
+    return advice.slice(0, 6) // Maxim 6 sfaturi
+  }, [selectedProducts])
+
+  // Inițializează sfaturile AI ca fiind goale la încărcarea componentei
+  useEffect(() => {
+    console.log('🚀 AI: Inițializez sfaturile AI ca fiind goale')
+    setAiAdvice([])
   }, [])
 
   // Funcție pentru afișarea bolilor asociate unui medicament
@@ -479,6 +603,254 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
     }))
   }, [])
 
+  // Funcții pentru gestionarea produselor selectate
+  const handleProductSelect = useCallback((medicine) => {
+    setSelectedProducts(prev => {
+      const isSelected = prev.some(selected => selected['Cod medicament'] === medicine['Cod medicament'])
+      if (isSelected) {
+        return prev.filter(selected => selected['Cod medicament'] !== medicine['Cod medicament'])
+      } else {
+        return [...prev, medicine]
+      }
+    })
+  }, [])
+
+  const clearSelectedProducts = useCallback(() => {
+    setSelectedProducts([])
+  }, [])
+
+  const removeSelectedProduct = useCallback((medicineCode) => {
+    setSelectedProducts(prev => prev.filter(selected => selected['Cod medicament'] !== medicineCode))
+  }, [])
+
+  // Funcție pentru a obține procentul de compensare
+  const getCompensationPercentage = useCallback((compensationCategory) => {
+    const category = compensationCategories.find(cat => cat.id === compensationCategory)
+    return category ? category.percentage : compensationCategory
+  }, [])
+
+  // Funcție helper pentru a converti frecvența în text lizibil
+  const getFrequencyText = useCallback((frequency) => {
+    const frequencyMap = {
+      '1': 'o dată pe zi',
+      '2': 'de două ori pe zi',
+      '3': 'de trei ori pe zi',
+      '4': 'de patru ori pe zi',
+      '6': 'la 4 ore',
+      '8': 'de opt ori pe zi',
+      '12': 'la 12 ore'
+    }
+    return frequencyMap[frequency] || `${frequency} ori pe zi`
+  }, [])
+
+  const getTimeText = useCallback((time) => {
+    const timeMap = {
+      'dimineata': 'dimineața',
+      'amiaza': 'amiaza',
+      'seara': 'seara',
+      'noaptea': 'noaptea',
+      'la4ore': 'la 4 ore',
+      'la6ore': 'la 6 ore',
+      'la8ore': 'la 8 ore',
+      'la12ore': 'la 12 ore'
+    }
+    return timeMap[time] || time
+  }, [])
+
+  // Funcții pentru gestionarea planurilor de medicamente
+  const openPlanModal = useCallback((medicine) => {
+    setSelectedMedicineForPlan(medicine)
+    setShowPlanModal(true)
+  }, [])
+
+  const closePlanModal = useCallback(() => {
+    setShowPlanModal(false)
+    setSelectedMedicineForPlan(null)
+  }, [])
+
+  const saveMedicinePlan = useCallback((medicineCode, plan) => {
+    setMedicinePlans(prev => ({
+      ...prev,
+      [medicineCode]: plan
+    }))
+    closePlanModal()
+  }, [closePlanModal])
+
+  const removeMedicinePlan = useCallback((medicineCode) => {
+    setMedicinePlans(prev => {
+      const newPlans = { ...prev }
+      delete newPlans[medicineCode]
+      return newPlans
+    })
+  }, [])
+
+  // Funcție pentru descărcarea produselor selectate în format PDF
+  const downloadSelectedProducts = useCallback(() => {
+    if (selectedProducts.length === 0) {
+      alert('Nu ai selectat niciun produs pentru descărcare!')
+      return
+    }
+
+    // Generează conținutul HTML pentru PDF
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Rețetă</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 20px;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #1a3c7c;
+              padding-bottom: 10px;
+            }
+            .header h1 {
+              color: #1a3c7c;
+              margin: 0;
+              font-size: 24px;
+            }
+            .header p {
+              margin: 5px 0 0 0;
+              color: #666;
+              font-size: 14px;
+            }
+            .table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 20px;
+            }
+            .table th {
+              background-color: #1a3c7c;
+              color: white;
+              padding: 12px;
+              text-align: left;
+              font-weight: bold;
+            }
+            .table td {
+              padding: 10px 12px;
+              border-bottom: 1px solid #ddd;
+            }
+            .table tr:nth-child(even) {
+              background-color: #f9f9f9;
+            }
+            .table tr:hover {
+              background-color: #f0f8ff;
+            }
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              font-size: 12px;
+              color: #666;
+              border-top: 1px solid #ddd;
+              padding-top: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Rețetă </h1>
+            <p>Generat la: ${new Date().toLocaleString('ro-RO')}</p>
+            <p>Total medicamente: ${selectedProducts.length}</p>
+          </div>
+          
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nr.</th>
+                <th>Denumire Medicament</th>
+                <th>Cod Medicament</th>
+                <th>Plan de Tratament</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${selectedProducts.map((product, index) => {
+                const medicineCode = product['Cod medicament']
+                const plan = medicinePlans[medicineCode]
+                let planDescription = 'Fără plan'
+                
+                if (plan) {
+                  const parts = []
+                  
+                  if (plan.duration) {
+                    parts.push(plan.duration === '1' ? '1 zi' : `${plan.duration} zile`)
+                  }
+                  
+                  if (plan.frequency) {
+                    if (plan.isCustomFrequency) {
+                      // Dacă e personalizare, afișează direct valoarea cu "ori pe zi"
+                      parts.push(`${plan.frequency} ori pe zi`)
+                    } else {
+                      // Dacă e selecție predefinită, folosește maparea
+                      const frequencyMap = {
+                        '1': 'o dată pe zi',
+                        '2': 'de două ori pe zi',
+                        '3': 'de trei ori pe zi',
+                        '4': 'de patru ori pe zi'
+                      }
+                      parts.push(frequencyMap[plan.frequency] || `${plan.frequency} ori pe zi`)
+                    }
+                  }
+                  
+                  if (plan.times && plan.times.length > 0) {
+                    const timesText = plan.times.map(time => {
+                      const timeMap = {
+                        'dimineata': 'dimineața',
+                        'amiaza': 'amiaza',
+                        'seara': 'seara',
+                        'noaptea': 'noaptea',
+                        'la4ore': 'la 4 ore',
+                        'la6ore': 'la 6 ore',
+                        'la8ore': 'la 8 ore',
+                        'la12ore': 'la 12 ore'
+                      }
+                      return timeMap[time] || time
+                    }).join(', ')
+                    parts.push(timesText)
+                  }
+                  
+                  planDescription = parts.join(', ')
+                }
+                
+                return `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${product['Denumire medicament'] || 'N/A'}</td>
+                    <td>${product['Cod medicament'] || 'N/A'}</td>
+                    <td>${planDescription}</td>
+                  </tr>
+                `
+              }).join('')}
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            <p>Document generat automat de aplicația MedAI</p>
+          </div>
+        </body>
+      </html>
+    `
+
+    // Creează un nou window pentru print
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(htmlContent)
+    printWindow.document.close()
+    
+    // Așteaptă ca conținutul să se încarce și apoi deschide dialogul de print
+    printWindow.onload = function() {
+      printWindow.print()
+      // Opțional: închide fereastra după print
+      setTimeout(() => {
+        printWindow.close()
+      }, 1000)
+    }
+  }, [selectedProducts, medicinePlans])
+
   // Filtrează valorile pe baza termenului de căutare
   const getFilteredValues = (filterKey) => {
     return Object.keys(filters[filterKey] || {}).filter(value =>
@@ -532,6 +904,141 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
 
   return (
     <div className="medicines-container">
+      {/* Butoane Indicații */}
+      <div className="notes-buttons-container">
+        <button 
+          className="patient-notes-button"
+          onClick={() => setShowPatientNotes(!showPatientNotes)}
+          title="Indicații Pacient"
+        >
+          📝 Indicații Pacient
+        </button>
+        <button 
+          className="doctor-notes-button"
+          onClick={async () => {
+            // Deschide modalul direct
+            setShowDoctorNotes(!showDoctorNotes)
+            
+            // Verifică dacă există indicații pacient și generează sfaturi AI
+            if (patientNotes && patientNotes.trim() !== '') {
+              console.log('🔍 Verifică indicațiile pacientului:', patientNotes)
+              setIsLoadingAI(true)
+              setAiAdvice([]) // Șterge sfaturile vechi
+              
+              try {
+                const newAdvice = await generateAIAdvice(patientNotes)
+                console.log('🤖 Generez sfaturi AI bazate pe indicațiile pacientului:', newAdvice)
+                setAiAdvice(newAdvice)
+              } catch (error) {
+                console.error('Eroare la generarea sfaturilor AI:', error)
+                setAiAdvice([{ icon: '❌', text: 'Eroare la generarea sfaturilor AI' }])
+              } finally {
+                setIsLoadingAI(false)
+              }
+            } else {
+              console.log('⚠️ Nu există indicații pacient - afișez mesaj informativ')
+              setAiAdvice([])
+              setIsLoadingAI(false)
+            }
+          }}
+          title="Indicații Medicului"
+        >
+          👨‍⚕️ Indicații Medicului
+        </button>
+      </div>
+
+      {/* Zona de notițe pentru pacient */}
+      {showPatientNotes && (
+        <div className="patient-notes-overlay">
+          <div className="patient-notes-content">
+            <div className="patient-notes-header-content">
+              <h3>📝 Indicații Pacient</h3>
+              <button 
+                className="patient-notes-close"
+                onClick={() => setShowPatientNotes(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <textarea
+              className="patient-notes-textarea"
+              placeholder="Scrie aici cum se simte pacientul, simptomele, observațiile medicale..."
+              value={patientNotes}
+              onChange={(e) => setPatientNotes(e.target.value)}
+            />
+            <div className="patient-notes-footer">
+              <p>Notițele se salvează automat</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Zona de notițe pentru medic */}
+      {showDoctorNotes && (
+        <div className="doctor-notes-overlay">
+          <div className="doctor-notes-content">
+            <div className="doctor-notes-header-content">
+              <h3>👨‍⚕️ Indicații Medic</h3>
+              <button 
+                className="doctor-notes-close"
+                onClick={() => setShowDoctorNotes(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="doctor-notes-main-content">
+              {/* Jumătatea de sus - Notițele medicului */}
+              <div className="doctor-notes-section">
+                <div className="doctor-notes-section-header">
+                  <h4>📝 Notițele mele</h4>
+                </div>
+                <textarea
+                  className="doctor-notes-textarea"
+                  placeholder="Scrie aici indicațiile medicale, recomandările, observațiile..."
+                  value={doctorNotes}
+                  onChange={(e) => setDoctorNotes(e.target.value)}
+                />
+              </div>
+              
+              {/* Jumătatea de jos - Sfaturile AI */}
+              <div className="ai-advice-section">
+                <div className="ai-advice-section-header">
+                  <h4>🤖 Sfaturi AI</h4>
+                </div>
+                <div className="ai-advice-content">
+                  {isLoadingAI ? (
+                    <div className="ai-advice-loading">
+                      <div className="ai-loading-spinner">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                      <span className="ai-loading-text">🤖 AI-ul analizează indicațiile și generează sfaturi medicale...</span>
+                    </div>
+                  ) : aiAdvice.length > 0 ? (
+                    aiAdvice.map((advice, index) => (
+                      <div key={index} className="ai-advice-item">
+                        <span className="ai-advice-icon">{advice.icon}</span>
+                        <span className="ai-advice-text">{advice.text}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="ai-advice-empty">
+                      <span className="ai-advice-icon">🤖</span>
+                      <span className="ai-advice-text">Scrie indicațiile pacientului pentru a primi sfaturi AI personalizate</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="doctor-notes-footer">
+              <p>Indicațiile se salvează automat</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="search-container">
         <input
           type="text"
@@ -580,7 +1087,7 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
         </div>
       </div>
 
-      {/* Layout cu două coloane */}
+      {/* Layout cu trei coloane */}
       <div className="main-content-layout">
         {/* Coloana stângă - Filtre */}
         <div className="filters-column">
@@ -669,14 +1176,20 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
                 </tr>
               </thead>
               <tbody>
-                {currentMedicines.map((medicine, index) => (
-                  <tr key={index}>
-                    <td className="row-number">
-                      {itemsPerPage === 'All' 
-                        ? startIndex + index + 1 
-                        : (currentPage - 1) * itemsPerPage + index + 1
-                      }
-                    </td>
+                {currentMedicines.map((medicine, index) => {
+                  const isSelected = selectedProducts.some(selected => selected['Cod medicament'] === medicine['Cod medicament'])
+                  return (
+                    <tr 
+                      key={index} 
+                      className={`medicine-row ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleProductSelect(medicine)}
+                    >
+                      <td className="row-number">
+                        {itemsPerPage === 'All' 
+                          ? startIndex + index + 1 
+                          : (currentPage - 1) * itemsPerPage + index + 1
+                        }
+                      </td>
                     {headers.map((header, headerIndex) => (
                       <td key={headerIndex}>
                         {header === 'Coduri_Boli' ? (
@@ -692,8 +1205,9 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
                         )}
                       </td>
                     ))}
-                  </tr>
-                ))}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -729,6 +1243,117 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
               </span>
             </div>
           )}
+        </div>
+
+        {/* Coloana dreaptă - Produse selectate */}
+        <div className="selected-products-column">
+          <div className="selected-products-section">
+            <div className="selected-products-header">
+              <h4 className="filter-section-title">Medicamente selectate</h4>
+              {selectedProducts.length > 0 && (
+                <div className="selected-products-header-buttons">
+                  <button 
+                    className="download-selected-products-button"
+                    onClick={downloadSelectedProducts}
+                    title="Descarcă produsele selectate în format PDF"
+                  >
+                    📥
+                  </button>
+                  <button 
+                    className="clear-selected-products-button"
+                    onClick={clearSelectedProducts}
+                    title="Șterge toate produsele selectate"
+                  >
+                    🗑️ 
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="selected-products-list">
+              {selectedProducts.length === 0 ? (
+                <div className="no-selected-products">
+                  <p>Nu ai selectat încă niciun produs.</p>
+                  <p>Click pe un medicament din tabel pentru a-l adăuga aici.</p>
+                </div>
+              ) : (
+                selectedProducts.map((product, index) => (
+                  <div key={product['Cod medicament']} className="selected-product-item">
+                    <div className="selected-product-info">
+                      <div className="selected-product-name">
+                        {product['Denumire medicament']}
+                      </div>
+                      <div className="selected-product-details">
+                        <span className="selected-product-code">
+                          Cod: {product['Cod medicament']}
+                        </span>
+                        {product['Lista de compensare'] && (
+                          <span className="selected-product-compensation">
+                            Compensare: {getCompensationPercentage(product['Lista de compensare'])}
+                          </span>
+                        )}
+                      </div>
+                      <div className="selected-product-plan-section">
+                        <div className="plan-display-container">
+                          <button 
+                            className="plan-medicine-button"
+                            onClick={() => openPlanModal(product)}
+                            title="Creează plan de tratament"
+                          >
+                            📋 Plan
+                          </button>
+                          {medicinePlans[product['Cod medicament']] && (
+                            <div className="saved-plan-display">
+                              {(() => {
+                                const plan = medicinePlans[product['Cod medicament']]
+                                const parts = []
+                                
+                                if (plan.duration) {
+                                  parts.push(plan.duration === '1' ? '1 zi' : `${plan.duration} zile`)
+                                }
+                                
+                                if (plan.frequency) {
+                                  if (plan.isCustomFrequency) {
+                                    // Dacă e personalizare, afișează direct valoarea cu "ori pe zi"
+                                    parts.push(`${plan.frequency} ori pe zi`)
+                                  } else {
+                                    // Dacă e selecție predefinită, folosește maparea
+                                    parts.push(getFrequencyText(plan.frequency))
+                                  }
+                                }
+                                
+                                if (plan.times && plan.times.length > 0) {
+                                  const timesText = plan.times.map(time => getTimeText(time)).join(' | ')
+                                  parts.push(timesText)
+                                }
+                                
+                                return parts.join(' | ')
+                              })()}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="selected-product-actions">
+                      <button 
+                        className="remove-selected-product-button"
+                        onClick={() => removeSelectedProduct(product['Cod medicament'])}
+                        title="Elimină din selecție"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            
+            {selectedProducts.length > 0 && (
+              <div className="selected-products-summary">
+                <p>Total produse selectate: <strong>{selectedProducts.length}</strong></p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -871,6 +1496,335 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
           </div>
         </div>
       )}
+
+      {/* Modal pentru crearea planului de tratament */}
+      {showPlanModal && selectedMedicineForPlan && (
+        <PlanModal 
+          medicine={selectedMedicineForPlan}
+          onClose={closePlanModal}
+          onSave={saveMedicinePlan}
+          existingPlan={medicinePlans[selectedMedicineForPlan['Cod medicament']]}
+        />
+      )}
+    </div>
+  )
+}
+
+// Componenta pentru modalul de plan de tratament
+const PlanModal = ({ medicine, onClose, onSave, existingPlan }) => {
+  const [selectedDuration, setSelectedDuration] = useState('')
+  const [selectedFrequency, setSelectedFrequency] = useState('')
+  const [selectedTimes, setSelectedTimes] = useState([])
+  const [customDuration, setCustomDuration] = useState('')
+  const [customFrequency, setCustomFrequency] = useState('')
+  const [customTime, setCustomTime] = useState('')
+  const [showCustomDuration, setShowCustomDuration] = useState(false)
+  const [showCustomFrequency, setShowCustomFrequency] = useState(false)
+  const [showCustomTime, setShowCustomTime] = useState(false)
+
+  // Inițializează modalul cu planul existent dacă există
+  useEffect(() => {
+    if (existingPlan) {
+      setSelectedDuration(existingPlan.duration || '')
+      setSelectedFrequency(existingPlan.frequency || '')
+      setSelectedTimes(existingPlan.times || [])
+      setCustomDuration(existingPlan.customDuration || '')
+      setCustomFrequency(existingPlan.customFrequency || '')
+      setCustomTime(existingPlan.customTime || '')
+    }
+  }, [existingPlan])
+
+  const durationOptions = [
+    { value: '7', label: '7 zile' },
+    { value: '10', label: '10 zile' },
+    { value: '14', label: '14 zile' },
+    { value: '21', label: '21 zile' },
+    { value: '30', label: '30 zile' },
+    { value: '40', label: '40 zile' },
+    { value: '60', label: '60 zile' },
+    { value: '90', label: '90 zile' }
+  ]
+
+  const frequencyOptions = [
+    { value: '1', label: 'O dată pe zi' },
+    { value: '2', label: 'De două ori pe zi' },
+    { value: '3', label: 'De trei ori pe zi' },
+    { value: '4', label: 'De patru ori pe zi' },
+    { value: '6', label: 'La 4 ore' },
+    { value: '8', label: 'La 8 ore' },
+    { value: '12', label: 'La 12 ore' }
+  ]
+
+  const timeOptions = [
+    { value: 'dimineata', label: 'Dimineața' },
+    { value: 'amiaza', label: 'Amiaza' },
+    { value: 'seara', label: 'Seara' },
+    { value: 'noaptea', label: 'Noaptea' },
+    { value: 'la4ore', label: 'La 4 ore' },
+    { value: 'la6ore', label: 'La 6 ore' },
+    { value: 'la8ore', label: 'La 8 ore' },
+    { value: 'la12ore', label: 'La 12 ore' }
+  ]
+
+  const handleTimeToggle = (timeValue) => {
+    setSelectedTimes(prev => 
+      prev.includes(timeValue) 
+        ? prev.filter(t => t !== timeValue) // Deselectează dacă e deja selectat
+        : [...prev, timeValue] // Selectează dacă nu e selectat
+    )
+  }
+
+  const handleCustomDuration = () => {
+    if (customDuration && !isNaN(customDuration) && customDuration > 0) {
+      setSelectedDuration('') // Șterge selecția predefinită
+      setShowCustomDuration(false)
+    }
+  }
+
+  const handleCustomFrequency = () => {
+    if (customFrequency && !isNaN(customFrequency) && customFrequency > 0) {
+      setSelectedFrequency('') // Șterge selecția predefinită
+      setShowCustomFrequency(false)
+    }
+  }
+
+  const handleCustomTime = () => {
+    if (customTime.trim()) {
+      setSelectedTimes(prev => [...prev, customTime.trim()])
+      setCustomTime('')
+      setShowCustomTime(false)
+    }
+  }
+
+  const handleSave = () => {
+    const hasDuration = selectedDuration || customDuration
+    const hasFrequency = selectedFrequency || customFrequency
+    const hasTimes = selectedTimes.length > 0 || customTime
+    
+    // Verifică dacă există vreo selecție sau personalizare
+    if (!hasDuration && !hasFrequency && !hasTimes) {
+      // Nu salva nimic dacă nu s-a selectat sau personalizat nimic
+      onClose()
+      return
+    }
+
+    const plan = {
+      duration: selectedDuration || customDuration || '',
+      frequency: selectedFrequency || customFrequency || '',
+      times: selectedTimes,
+      customDuration: customDuration,
+      customFrequency: customFrequency,
+      customTime: customTime,
+      isCustomFrequency: !!customFrequency, // Flag pentru a ști dacă e personalizare
+      medicineName: medicine['Denumire medicament'],
+      medicineCode: medicine['Cod medicament']
+    }
+
+    onSave(medicine['Cod medicament'], plan)
+  }
+
+  return (
+    <div className="plan-modal-overlay" onClick={onClose}>
+      <div className="plan-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="plan-modal-header">
+          <h3>📋 Plan de tratament</h3>
+          <button className="plan-modal-close" onClick={onClose}>✕</button>
+        </div>
+        
+        <div className="plan-modal-body">
+          <div className="medicine-info">
+            <h4>{medicine['Denumire medicament']}</h4>
+            <p>Cod: {medicine['Cod medicament']}</p>
+          </div>
+
+          <div className="plan-options">
+            <div className="plan-section">
+              <h5>Durata tratamentului:</h5>
+              <div className="plan-buttons-grid">
+                {durationOptions.map(option => (
+                  <button
+                    key={option.value}
+                    className={`plan-option-button ${selectedDuration === option.value && !customDuration ? 'selected' : ''}`}
+                    onClick={() => {
+                      if (selectedDuration === option.value) {
+                        setSelectedDuration('') // Deselectează dacă e deja selectat
+                      } else {
+                        setSelectedDuration(option.value)
+                        setCustomDuration('')
+                      }
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+                <button
+                  className="plan-custom-button"
+                  onClick={() => setShowCustomDuration(!showCustomDuration)}
+                >
+                  ✏️ Personalizează
+                </button>
+              </div>
+              {showCustomDuration && (
+                <div className="custom-input-section">
+                  <input
+                    type="number"
+                    placeholder="Introdu numărul de zile"
+                    value={customDuration}
+                    onChange={(e) => setCustomDuration(e.target.value)}
+                    className="custom-input"
+                    min="1"
+                  />
+                  <button
+                    className="custom-save-button"
+                    onClick={handleCustomDuration}
+                  >
+                    Salvează
+                  </button>
+                  <button
+                    className="custom-cancel-button"
+                    onClick={() => {
+                      setShowCustomDuration(false)
+                      setCustomDuration('')
+                    }}
+                  >
+                    Anulează
+                  </button>
+                </div>
+              )}
+              {customDuration && (
+                <div className="custom-display">
+                  <span className="custom-label">Personalizat:</span>
+                  <span className="custom-value">{customDuration} zile</span>
+                </div>
+              )}
+            </div>
+
+            <div className="plan-section">
+              <h5>Frecvența administrării:</h5>
+              <div className="plan-buttons-grid">
+                {frequencyOptions.map(option => (
+                  <button
+                    key={option.value}
+                    className={`plan-option-button ${selectedFrequency === option.value && !customFrequency ? 'selected' : ''}`}
+                    onClick={() => {
+                      if (selectedFrequency === option.value) {
+                        setSelectedFrequency('') // Deselectează dacă e deja selectat
+                      } else {
+                        setSelectedFrequency(option.value)
+                        setCustomFrequency('')
+                      }
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+                <button
+                  className="plan-custom-button"
+                  onClick={() => setShowCustomFrequency(!showCustomFrequency)}
+                >
+                  ✏️ Personalizează
+                </button>
+              </div>
+              {showCustomFrequency && (
+                <div className="custom-input-section">
+                  <input
+                    type="number"
+                    placeholder="Introdu numărul de administrări pe zi"
+                    value={customFrequency}
+                    onChange={(e) => setCustomFrequency(e.target.value)}
+                    className="custom-input"
+                    min="1"
+                    max="24"
+                  />
+                  <button
+                    className="custom-save-button"
+                    onClick={handleCustomFrequency}
+                  >
+                    Salvează
+                  </button>
+                  <button
+                    className="custom-cancel-button"
+                    onClick={() => {
+                      setShowCustomFrequency(false)
+                      setCustomFrequency('')
+                    }}
+                  >
+                    Anulează
+                  </button>
+                </div>
+              )}
+              {customFrequency && (
+                <div className="custom-display">
+                  <span className="custom-label">Personalizat:</span>
+                  <span className="custom-value">{customFrequency} ori pe zi</span>
+                </div>
+              )}
+            </div>
+
+            <div className="plan-section">
+              <h5>Orele administrării:</h5>
+              <div className="plan-buttons-grid">
+                {timeOptions.map(option => (
+                  <button
+                    key={option.value}
+                    className={`plan-option-button ${selectedTimes.includes(option.value) ? 'selected' : ''}`}
+                    onClick={() => handleTimeToggle(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+                <button
+                  className="plan-custom-button"
+                  onClick={() => setShowCustomTime(!showCustomTime)}
+                >
+                  ✏️ Personalizează
+                </button>
+              </div>
+              {showCustomTime && (
+                <div className="custom-input-section">
+                  <input
+                    type="text"
+                    placeholder="Ex: 08:00, 14:00, 20:00"
+                    value={customTime}
+                    onChange={(e) => setCustomTime(e.target.value)}
+                    className="custom-input"
+                  />
+                  <button
+                    className="custom-save-button"
+                    onClick={handleCustomTime}
+                  >
+                    Adaugă
+                  </button>
+                  <button
+                    className="custom-cancel-button"
+                    onClick={() => {
+                      setShowCustomTime(false)
+                      setCustomTime('')
+                    }}
+                  >
+                    Anulează
+                  </button>
+                </div>
+              )}
+              {customTime && (
+                <div className="custom-display">
+                  <span className="custom-label">Personalizat:</span>
+                  <span className="custom-value">{customTime}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="plan-modal-footer">
+          <button className="plan-cancel-button" onClick={onClose}>
+            Anulează
+          </button>
+          <button className="plan-save-button" onClick={handleSave}>
+            Salvează Plan
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
