@@ -28,6 +28,8 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
   const [showPlanModal, setShowPlanModal] = useState(false)
   const [selectedMedicineForPlan, setSelectedMedicineForPlan] = useState(null)
   const [medicinePlans, setMedicinePlans] = useState({})
+  const [showAddMedicineModal, setShowAddMedicineModal] = useState(false)
+  const [newMedicineName, setNewMedicineName] = useState('')
 
   // Primele 4 coloane afișate implicit (fără Coduri_Boli)
   const defaultVisibleColumns = [
@@ -387,14 +389,19 @@ IMPORTANT:
 - Fiecare sfat să fie specific și acționabil
 - Nu folosi template-uri formale
 - Răspunde în limba română
-- Fiecare sfat să fie pe o linie separată, începând cu un emoji relevant
+- NU folosi emoji-uri în sfaturi
+- NU folosi numerotare în NICIUN FEL (1., 2., -, *, etc.)
+- NU folosi prefixe sau simboluri
+- Fiecare sfat să fie DOAR TEXT SIMPLU
+- Fiecare sfat să fie pe o linie separată
 - Sfaturile să fie bazate pe simptomele/observațiile menționate
 
-Formatul răspunsului:
-🤕 Sfat medical specific
-💊 Alt sfat medical
-🔍 Următorul sfat
-etc.`
+Formatul răspunsului (DOAR TEXT SIMPLU):
+Pentru durerile de cap, încearcă mai întâi paracetamol
+Monitorizează temperatura regulat dacă ai febră
+Verifică tensiunea arterială dacă durerile persistă
+Consideră odihna și hidratarea abundentă
+Programează o consultație dacă simptomele persistă`
             },
             {
               role: 'user',
@@ -418,12 +425,9 @@ etc.`
       const lines = aiResponse.split('\n').filter(line => line.trim())
       lines.forEach(line => {
         const trimmedLine = line.trim()
-        if (trimmedLine && (trimmedLine.includes('🤕') || trimmedLine.includes('💊') || trimmedLine.includes('🔍') || trimmedLine.includes('🌡️') || trimmedLine.includes('🩺') || trimmedLine.includes('⚠️') || trimmedLine.includes('📋') || trimmedLine.includes('🔄') || trimmedLine.includes('📊') || trimmedLine.includes('💡') || trimmedLine.includes('🦠') || trimmedLine.includes('🍯') || trimmedLine.includes('🥗') || trimmedLine.includes('😴') || trimmedLine.includes('🌙') || trimmedLine.includes('🤢') || trimmedLine.includes('🫁') || trimmedLine.includes('💨') || trimmedLine.includes('🤧') || trimmedLine.includes('⏰') || trimmedLine.includes('🔗'))) {
-          const icon = trimmedLine.charAt(0)
-          const text = trimmedLine.substring(1).trim()
-          if (text) {
-            advice.push({ icon, text })
-          }
+        if (trimmedLine && trimmedLine.length > 0) {
+          // Adaugă sfatul fără emoji-uri
+          advice.push({ icon: '', text: trimmedLine })
         }
       })
 
@@ -619,6 +623,7 @@ etc.`
     setSelectedProducts([])
   }, [])
 
+
   const removeSelectedProduct = useCallback((medicineCode) => {
     setSelectedProducts(prev => prev.filter(selected => selected['Cod medicament'] !== medicineCode))
   }, [])
@@ -684,10 +689,46 @@ etc.`
     })
   }, [])
 
+  // Funcții pentru gestionarea medicamentelor personalizate
+  const openAddMedicineModal = useCallback(() => {
+    setShowAddMedicineModal(true)
+    setNewMedicineName('')
+  }, [])
+
+  const closeAddMedicineModal = useCallback(() => {
+    setShowAddMedicineModal(false)
+    setNewMedicineName('')
+  }, [])
+
+  const addCustomMedicine = useCallback(() => {
+    if (!newMedicineName.trim()) {
+      alert('Te rog introdu numele medicamentului!')
+      return
+    }
+
+    const customMedicine = {
+      'Denumire medicament': newMedicineName.trim(),
+      'Cod medicament': 'N/A',
+      'Substanta activa': 'Personalizat',
+      'Lista de compensare': 'Personalizat',
+      'CategorieVarsta': 'Toate',
+      'Coduri_Boli': '',
+      'isCustom': true // Flag pentru a identifica medicamentele personalizate
+    }
+
+    setSelectedProducts(prev => [...prev, customMedicine])
+    closeAddMedicineModal()
+  }, [newMedicineName, closeAddMedicineModal])
+
   // Funcție pentru descărcarea produselor selectate în format PDF
   const downloadSelectedProducts = useCallback(() => {
-    if (selectedProducts.length === 0) {
-      alert('Nu ai selectat niciun produs pentru descărcare!')
+    // Verifică dacă există medicamente selectate sau notițe
+    const hasMedicines = selectedProducts.length > 0
+    const hasPatientNotes = patientNotes && patientNotes.trim() !== ''
+    const hasDoctorNotes = doctorNotes && doctorNotes.trim() !== ''
+    
+    if (!hasMedicines && !hasPatientNotes && !hasDoctorNotes) {
+      alert('Nu ai selectat niciun produs și nu ai scris notițe pentru descărcare!')
       return
     }
 
@@ -742,6 +783,66 @@ etc.`
             .table tr:hover {
               background-color: #f0f8ff;
             }
+            .patient-indications-section {
+              margin-top: 30px;
+              page-break-inside: avoid;
+            }
+            .patient-indications-section h2 {
+              color: #1a3c7c;
+              font-size: 18px;
+              margin-bottom: 15px;
+              border-bottom: 2px solid #1a3c7c;
+              padding-bottom: 5px;
+            }
+            .patient-indications-content {
+              background-color: #f8f9fa;
+              border: 1px solid #e9ecef;
+              border-radius: 5px;
+              padding: 15px;
+              font-size: 14px;
+              line-height: 1.6;
+              color: #333;
+              white-space: pre-wrap;
+              text-align: left;
+              text-indent: 0 !important;
+              margin: 0 !important;
+              padding-left: 15px !important;
+            }
+            .patient-indications-content p {
+              margin: 0 !important;
+              padding: 0 !important;
+              text-indent: 0 !important;
+            }
+            .doctor-indications-section {
+              margin-top: 30px;
+              page-break-inside: avoid;
+            }
+            .doctor-indications-section h2 {
+              color: #059669;
+              font-size: 18px;
+              margin-bottom: 15px;
+              border-bottom: 2px solid #059669;
+              padding-bottom: 5px;
+            }
+            .doctor-indications-content {
+              background-color: #f0fdf4;
+              border: 1px solid #bbf7d0;
+              border-radius: 5px;
+              padding: 15px;
+              font-size: 14px;
+              line-height: 1.6;
+              color: #333;
+              white-space: pre-wrap;
+              text-align: left;
+              text-indent: 0 !important;
+              margin: 0 !important;
+              padding-left: 15px !important;
+            }
+            .doctor-indications-content p {
+              margin: 0 !important;
+              padding: 0 !important;
+              text-indent: 0 !important;
+            }
             .footer {
               margin-top: 30px;
               text-align: center;
@@ -754,11 +855,12 @@ etc.`
         </head>
         <body>
           <div class="header">
-            <h1>Rețetă </h1>
+            <h1>${hasMedicines ? 'Rețetă' : 'Notițe Medicale'}</h1>
             <p>Generat la: ${new Date().toLocaleString('ro-RO')}</p>
-            <p>Total medicamente: ${selectedProducts.length}</p>
+            ${hasMedicines ? `<p>Total medicamente: ${selectedProducts.length}</p>` : ''}
           </div>
           
+          ${hasMedicines ? `
           <table class="table">
             <thead>
               <tr>
@@ -828,6 +930,25 @@ etc.`
               }).join('')}
             </tbody>
           </table>
+          ` : ''}
+          
+          ${patientNotes && patientNotes.trim() ? `
+          <div class="patient-indications-section">
+            <h2>Indicații Pacient</h2>
+            <div class="patient-indications-content">
+              ${patientNotes}
+            </div>
+          </div>
+          ` : ''}
+          
+          ${doctorNotes && doctorNotes.trim() ? `
+          <div class="doctor-indications-section">
+            <h2>Indicații Medicului</h2>
+            <div class="doctor-indications-content">
+              ${doctorNotes}
+            </div>
+          </div>
+          ` : ''}
           
           <div class="footer">
             <p>Document generat automat de aplicația MedAI</p>
@@ -941,9 +1062,9 @@ etc.`
               setIsLoadingAI(false)
             }
           }}
-          title="Indicații Medicului"
+          title="Indicații Medic"
         >
-          👨‍⚕️ Indicații Medicului
+          👨‍⚕️ Indicații Medic
         </button>
       </div>
 
@@ -991,6 +1112,78 @@ etc.`
               <div className="doctor-notes-section">
                 <div className="doctor-notes-section-header">
                   <h4>📝 Notițele mele</h4>
+                  <button 
+                    className="format-notes-button"
+                    onClick={async () => {
+                      if (!doctorNotes || doctorNotes.trim() === '') {
+                        alert('Nu există text de formatat!')
+                        return
+                      }
+                      
+                      try {
+                        const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+                        if (!apiKey) {
+                          alert('API key OpenAI nu este configurat!')
+                          return
+                        }
+
+                        const response = await fetch('/api/openai/v1/chat/completions', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                          },
+                          body: JSON.stringify({
+                            model: 'gpt-3.5-turbo',
+                            messages: [
+                              {
+                                role: 'system',
+                                content: `Ești un asistent medical care formatează textul medical. 
+
+IMPORTANT:
+- Formatează textul într-un mod plăcut și organizat
+- Folosește bullet points (-) pentru a organiza informațiile
+- NU folosi emoji-uri
+- NU folosi numerotare (1., 2., etc.)
+- Păstrează toate informațiile importante
+- Organizează textul logic și clar
+- Fiecare bullet point să fie pe o linie separată
+
+Formatul răspunsului:
+- Prima informație importantă
+- A doua informație importantă
+- A treia informație importantă
+etc.`
+                              },
+                              {
+                                role: 'user',
+                                content: `Formatează următorul text medical: "${doctorNotes}"`
+                              }
+                            ],
+                            temperature: 0.3,
+                            max_tokens: 800
+                          })
+                        })
+
+                        if (!response.ok) {
+                          throw new Error('Eroare la formatarea textului')
+                        }
+
+                        const data = await response.json()
+                        const formattedText = data.choices[0].message.content
+                        
+                        // Înlocuiește textul vechi cu cel formatat
+                        setDoctorNotes(formattedText)
+                        
+                      } catch (error) {
+                        console.error('Eroare la formatarea textului:', error)
+                        alert('Eroare la formatarea textului. Încearcă din nou.')
+                      }
+                    }}
+                    title="Formatează textul cu AI"
+                  >
+                    ✨ Formatează
+                  </button>
                 </div>
                 <textarea
                   className="doctor-notes-textarea"
@@ -1018,8 +1211,45 @@ etc.`
                   ) : aiAdvice.length > 0 ? (
                     aiAdvice.map((advice, index) => (
                       <div key={index} className="ai-advice-item">
-                        <span className="ai-advice-icon">{advice.icon}</span>
+                        {advice.icon && <span className="ai-advice-icon">{advice.icon}</span>}
                         <span className="ai-advice-text">{advice.text}</span>
+                        <div className="ai-advice-actions">
+                          <button 
+                            className="ai-advice-delete-btn"
+                            onClick={() => {
+                              const newAdvice = aiAdvice.filter((_, i) => i !== index)
+                              setAiAdvice(newAdvice)
+                            }}
+                            title="Șterge sfatul"
+                          >
+                            ✕
+                          </button>
+                          <button 
+                            className="ai-advice-save-btn"
+                            onClick={() => {
+                              console.log('💾 Salvând sfatul:', advice)
+                              console.log('📝 Notițele medicului înainte:', doctorNotes)
+                              
+                              // Adaugă sfatul la notițele medicului pe un rând nou
+                              const newDoctorNotes = doctorNotes + (doctorNotes ? '\n' : '') + (advice.icon ? `${advice.icon} ` : '') + advice.text
+                              console.log('📝 Notițele medicului după:', newDoctorNotes)
+                              
+                              // Actualizează state-ul
+                              setDoctorNotes(newDoctorNotes)
+                              
+                              // Șterge sfatul din lista AI
+                              const newAdvice = aiAdvice.filter((_, i) => i !== index)
+                              console.log('🗑️ Sfaturi AI după ștergere:', newAdvice)
+                              setAiAdvice(newAdvice)
+                              
+                              // Mesaj de confirmare
+                              console.log('✅ Sfatul a fost salvat în notițele medicului!')
+                            }}
+                            title="Salvează în notițele medicului"
+                          >
+                            ✓
+                          </button>
+                        </div>
                       </div>
                     ))
                   ) : (
@@ -1250,24 +1480,33 @@ etc.`
           <div className="selected-products-section">
             <div className="selected-products-header">
               <h4 className="filter-section-title">Medicamente selectate</h4>
-              {selectedProducts.length > 0 && (
-                <div className="selected-products-header-buttons">
+              <div className="selected-products-header-buttons">
+                <button 
+                  className="add-medicine-button"
+                  onClick={openAddMedicineModal}
+                  title="Adaugă medicament personalizat"
+                >
+                  ➕
+                </button>
+                {(selectedProducts.length > 0 || (patientNotes && patientNotes.trim() !== '') || (doctorNotes && doctorNotes.trim() !== '')) && (
                   <button 
                     className="download-selected-products-button"
                     onClick={downloadSelectedProducts}
-                    title="Descarcă produsele selectate în format PDF"
+                    title="Descarcă produsele selectate și notițele în format PDF"
                   >
                     📥
                   </button>
+                )}
+                {selectedProducts.length > 0 && (
                   <button 
                     className="clear-selected-products-button"
                     onClick={clearSelectedProducts}
                     title="Șterge toate produsele selectate"
                   >
-                    🗑️ 
+                    🗑️
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
             
             <div className="selected-products-list">
@@ -1505,6 +1744,47 @@ etc.`
           onSave={saveMedicinePlan}
           existingPlan={medicinePlans[selectedMedicineForPlan['Cod medicament']]}
         />
+      )}
+
+      {/* Modal pentru adăugarea medicamentelor personalizate */}
+      {showAddMedicineModal && (
+        <div className="add-medicine-modal-overlay" onClick={closeAddMedicineModal}>
+          <div className="add-medicine-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="add-medicine-modal-header">
+              <h3>➕ Adaugă medicament personalizat</h3>
+              <button className="add-medicine-modal-close" onClick={closeAddMedicineModal}>✕</button>
+            </div>
+            
+            <div className="add-medicine-modal-body">
+              <div className="add-medicine-form">
+                <label htmlFor="medicineName">Numele medicamentului:</label>
+                <input
+                  id="medicineName"
+                  type="text"
+                  placeholder="Introdu numele medicamentului..."
+                  value={newMedicineName}
+                  onChange={(e) => setNewMedicineName(e.target.value)}
+                  className="add-medicine-input"
+                  autoFocus
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      addCustomMedicine()
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="add-medicine-modal-footer">
+              <button className="add-medicine-cancel-button" onClick={closeAddMedicineModal}>
+                Anulează
+              </button>
+              <button className="add-medicine-save-button" onClick={addCustomMedicine}>
+                Salvează
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -1825,6 +2105,7 @@ const PlanModal = ({ medicine, onClose, onSave, existingPlan }) => {
           </button>
         </div>
       </div>
+
     </div>
   )
 }
