@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react'
-import './ChatBot.css'
 
 const ChatBot = ({ medicinesData = [] }) => {
   const [isOpen, setIsOpen] = useState(false)
