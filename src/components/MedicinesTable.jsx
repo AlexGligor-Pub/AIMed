@@ -16,6 +16,7 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
   const [showFilters, setShowFilters] = useState({})
   const [showContextMenu, setShowContextMenu] = useState(false)
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
+  const [skipFadeAnimation, setSkipFadeAnimation] = useState(false)
   const [diseases, setDiseases] = useState({})
   const [selectedCompensationCategory, setSelectedCompensationCategory] = useState('toate')
   const [showPatientNotes, setShowPatientNotes] = useState(false)
@@ -337,6 +338,32 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
     if (savedDoctorNotes) {
       setDoctorNotes(savedDoctorNotes)
     }
+    
+    // Încarcă produsele selectate salvate
+    const savedSelectedProducts = localStorage.getItem('selectedProducts')
+    if (savedSelectedProducts) {
+      try {
+        const parsedProducts = JSON.parse(savedSelectedProducts)
+        setSelectedProducts(parsedProducts)
+        console.log('✅ Produse selectate încărcate din localStorage:', parsedProducts.length)
+      } catch (error) {
+        console.error('❌ Eroare la încărcarea produselor selectate:', error)
+        localStorage.removeItem('selectedProducts')
+      }
+    }
+
+    // Încarcă planurile de medicamente salvate
+    const savedMedicinePlans = localStorage.getItem('medicinePlans')
+    if (savedMedicinePlans) {
+      try {
+        const parsedPlans = JSON.parse(savedMedicinePlans)
+        setMedicinePlans(parsedPlans)
+        console.log('✅ Planuri medicamente încărcate din localStorage:', Object.keys(parsedPlans).length)
+      } catch (error) {
+        console.error('❌ Eroare la încărcarea planurilor de medicamente:', error)
+        localStorage.removeItem('medicinePlans')
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -352,6 +379,24 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
       localStorage.setItem('doctorNotes', doctorNotes)
     }
   }, [doctorNotes])
+
+  // Salvează produsele selectate în localStorage când se schimbă
+  useEffect(() => {
+    if (selectedProducts.length > 0) {
+      localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts))
+    } else {
+      localStorage.removeItem('selectedProducts')
+    }
+  }, [selectedProducts])
+
+  // Salvează planurile de medicamente în localStorage când se schimbă
+  useEffect(() => {
+    if (Object.keys(medicinePlans).length > 0) {
+      localStorage.setItem('medicinePlans', JSON.stringify(medicinePlans))
+    } else {
+      localStorage.removeItem('medicinePlans')
+    }
+  }, [medicinePlans])
 
   // Funcția AI Medic - analizează indicațiile pacientului și generează sfaturi
   const generateAIAdvice = useCallback(async (patientNotesText) => {
@@ -586,11 +631,13 @@ Programează o consultație dacă simptomele persistă`
       x: rect.left,
       y: rect.bottom + 5
     })
+    setSkipFadeAnimation(false) // Permite animația pentru deschiderea normală
     setShowContextMenu(true)
   }, [])
 
   const handleContextMenuClose = useCallback(() => {
     setShowContextMenu(false)
+    setSkipFadeAnimation(false)
   }, [])
 
   const handleFilterClick = useCallback((filterKey) => {
@@ -622,6 +669,40 @@ Programează o consultație dacă simptomele persistă`
 
   const clearSelectedProducts = useCallback(() => {
     setSelectedProducts([])
+  }, [])
+
+  // Funcție pentru deschiderea modalului de confirmare
+  const openNewPatientModal = useCallback(() => {
+    setShowNewPatientModal(true)
+  }, [])
+
+  // Funcție pentru ștergerea tuturor datelor (pacient nou)
+  const clearAllPatientData = useCallback(() => {
+    // Șterge indicatiile pacientului
+    setPatientNotes('')
+    localStorage.removeItem('patientNotes')
+    
+    // Șterge indicatiile medicului
+    setDoctorNotes('')
+    localStorage.removeItem('doctorNotes')
+    
+    // Șterge medicamentele selectate
+    setSelectedProducts([])
+    localStorage.removeItem('selectedProducts')
+    
+    // Șterge planurile de medicamente
+    setMedicinePlans({})
+    localStorage.removeItem('medicinePlans')
+    
+    // Șterge sfaturile AI
+    setAiAdvice([])
+    
+    // Închide modalele deschise
+    setShowPatientNotes(false)
+    setShowDoctorNotes(false)
+    setShowNewPatientModal(false)
+    
+    console.log('✅ Toate datele pacientului au fost șterse')
   }, [])
 
 
@@ -708,7 +789,7 @@ Programează o consultație dacă simptomele persistă`
     }
 
     const customMedicine = {
-      'Denumire medicament': newMedicineName.trim(),
+      'Denumire medicament': newMedicineName.trim().toUpperCase(),
       'Cod medicament': 'N/A',
       'Substanta activa': 'Personalizat',
       'Lista de compensare': 'Personalizat',
@@ -723,15 +804,20 @@ Programează o consultație dacă simptomele persistă`
 
   // Funcție pentru descărcarea produselor selectate în format PDF
   const downloadSelectedProducts = useCallback(() => {
+    // Actualizează automat toate datele înainte de generarea PDF-ului
+    console.log('🔄 Actualizez datele pentru PDF...')
+    
     // Verifică dacă există medicamente selectate sau notițe
     const hasMedicines = selectedProducts.length > 0
     const hasPatientNotes = patientNotes && patientNotes.trim() !== ''
     const hasDoctorNotes = doctorNotes && doctorNotes.trim() !== ''
     
-    if (!hasMedicines && !hasPatientNotes && !hasDoctorNotes) {
-      alert('Nu ai selectat niciun produs și nu ai scris notițe pentru descărcare!')
-      return
-    }
+    // Permite descărcarea chiar dacă nu există conținut
+    console.log('📊 Status conținut:', {
+      medicamente: selectedProducts.length,
+      indicatiiPacient: hasPatientNotes,
+      indicatiiMedic: hasDoctorNotes
+    })
 
     // Generează conținutul HTML pentru PDF
     const htmlContent = `
@@ -803,15 +889,18 @@ Programează o consultație dacă simptomele persistă`
               font-size: 14px;
               line-height: 1.6;
               color: #333;
-              white-space: pre-wrap;
+              white-space: pre-line;
               text-align: left;
               text-indent: 0 !important;
               margin: 0 !important;
-              padding-left: 15px !important;
+              padding-left: 10px !important;
             }
             .patient-indications-content p {
               margin: 0 !important;
               padding: 0 !important;
+              text-indent: 0 !important;
+            }
+            .patient-indications-content::first-line {
               text-indent: 0 !important;
             }
             .doctor-indications-section {
@@ -819,29 +908,32 @@ Programează o consultație dacă simptomele persistă`
               page-break-inside: avoid;
             }
             .doctor-indications-section h2 {
-              color: #059669;
+              color: #1a3c7c;
               font-size: 18px;
               margin-bottom: 15px;
-              border-bottom: 2px solid #059669;
+              border-bottom: 2px solid #1a3c7c;
               padding-bottom: 5px;
             }
             .doctor-indications-content {
-              background-color: #f0fdf4;
-              border: 1px solid #bbf7d0;
+              background-color: #f8f9fa;
+              border: 1px solid #e9ecef;
               border-radius: 5px;
               padding: 15px;
               font-size: 14px;
               line-height: 1.6;
               color: #333;
-              white-space: pre-wrap;
+              white-space: pre-line;
               text-align: left;
               text-indent: 0 !important;
               margin: 0 !important;
-              padding-left: 15px !important;
+              padding-left: 10px !important;
             }
             .doctor-indications-content p {
               margin: 0 !important;
               padding: 0 !important;
+              text-indent: 0 !important;
+            }
+            .doctor-indications-content::first-line {
               text-indent: 0 !important;
             }
             .footer {
@@ -959,19 +1051,22 @@ Programează o consultație dacă simptomele persistă`
     `
 
     // Creează un nou window pentru print
+    console.log('📄 Generez PDF cu datele actualizate...')
     const printWindow = window.open('', '_blank')
     printWindow.document.write(htmlContent)
     printWindow.document.close()
     
     // Așteaptă ca conținutul să se încarce și apoi deschide dialogul de print
     printWindow.onload = function() {
+      console.log('✅ PDF generat cu succes! Deschid dialogul de print...')
       printWindow.print()
       // Opțional: închide fereastra după print
       setTimeout(() => {
         printWindow.close()
+        console.log('📄 PDF descărcat și fereastra închisă')
       }, 1000)
     }
-  }, [selectedProducts, medicinePlans])
+  }, [selectedProducts, medicinePlans, patientNotes, doctorNotes])
 
   // Filtrează valorile pe baza termenului de căutare
   const getFilteredValues = (filterKey) => {
@@ -1007,42 +1102,6 @@ Programează o consultație dacă simptomele persistă`
 
   const allColumns = getAllColumns()
 
-  // Funcții pentru gestionarea pacientului nou
-  const openNewPatientModal = useCallback(() => {
-    console.log('🔍 openNewPatientModal apelată!')
-    console.log('🔍 showNewPatientModal înainte:', showNewPatientModal)
-    setShowNewPatientModal(true)
-    console.log('🔍 showNewPatientModal după:', true)
-  }, [showNewPatientModal])
-
-  const closeNewPatientModal = useCallback(() => {
-    console.log('🔍 closeNewPatientModal apelată!')
-    setShowNewPatientModal(false)
-  }, [])
-
-  const handleNewPatient = useCallback(() => {
-    // Șterge toate datele curente din state
-    setSelectedProducts([])
-    setPatientNotes('')
-    setDoctorNotes('')
-    setAiAdvice([])
-    setMedicinePlans({})
-    
-    // Șterge toate datele din localStorage
-    localStorage.removeItem('selectedProducts')
-    localStorage.removeItem('patientNotes')
-    localStorage.removeItem('doctorNotes')
-    localStorage.removeItem('aiAdvice')
-    localStorage.removeItem('medicinePlans')
-    
-    // Închide modalul
-    closeNewPatientModal()
-  }, [closeNewPatientModal])
-
-  // Monitorizează schimbările în showNewPatientModal
-  useEffect(() => {
-    console.log('🔍 showNewPatientModal s-a schimbat:', showNewPatientModal)
-  }, [showNewPatientModal])
 
   // Loading și Error states DUPĂ toate hook-urile
   if (loading) {
@@ -1063,12 +1122,21 @@ Programează o consultație dacă simptomele persistă`
 
   return (
     <div className="medicines-container">
+      {/* Buton Pacient Nou - în colțul din dreapta sus */}
+      <div className="new-patient-button-container">
+        <button 
+          className="new-patient-button"
+          onClick={openNewPatientModal}
+        >
+          🆕 Pacient nou
+        </button>
+      </div>
+
       {/* Butoane Indicații */}
       <div className="notes-buttons-container">
         <button 
           className="patient-notes-button"
           onClick={() => setShowPatientNotes(!showPatientNotes)}
-          title="Indicații Pacient"
         >
           📝 Indicații Pacient
         </button>
@@ -1100,32 +1168,11 @@ Programează o consultație dacă simptomele persistă`
               setIsLoadingAI(false)
             }
           }}
-          title="Indicații Medic"
         >
           👨‍⚕️ Indicații Medic
         </button>
       </div>
 
-      {/* Buton Pacient Nou - Colțul din dreapta sus */}
-      <div 
-        className="new-patient-container"
-        onClick={(e) => {
-          console.log('🔍 Container apăsat!');
-          e.stopPropagation();
-        }}
-      >
-        <button 
-          className="new-patient-button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🔍 Butonul Pacient Nou a fost apăsat!');
-            openNewPatientModal();
-          }}
-        >
-          👤 Pacient Nou
-        </button>
-      </div>
 
       {/* Zona de notițe pentru pacient */}
       {showPatientNotes && (
@@ -1239,7 +1286,6 @@ etc.`
                         alert('Eroare la formatarea textului. Încearcă din nou.')
                       }
                     }}
-                    title="Formatează textul cu AI"
                   >
                     ✨ Formatează
                   </button>
@@ -1279,7 +1325,6 @@ etc.`
                               const newAdvice = aiAdvice.filter((_, i) => i !== index)
                               setAiAdvice(newAdvice)
                             }}
-                            title="Șterge sfatul"
                           >
                             ✕
                           </button>
@@ -1304,7 +1349,6 @@ etc.`
                               // Mesaj de confirmare
                               console.log('✅ Sfatul a fost salvat în notițele medicului!')
                             }}
-                            title="Salvează în notițele medicului"
                           >
                             ✓
                           </button>
@@ -1340,14 +1384,12 @@ etc.`
         <button 
           className="column-toggle-button"
           onClick={() => setShowColumnModal(true)}
-          title="Filtrează coloanele"
         >
           ⚙️
         </button>
         <button 
           className="substance-filter-toggle-button"
           onClick={handleContextMenuClick}
-          title="Meniu filtre"
         >
           🔬
         </button>
@@ -1355,7 +1397,6 @@ etc.`
           <button 
             className="clear-all-filters-button"
             onClick={clearAllFilters}
-            title="Șterge toate filtrele"
           >
             🗑️ Șterge filtrele
           </button>
@@ -1420,7 +1461,6 @@ etc.`
                       key={category.id}
                       className={`category-btn compensation-category-btn ${selectedCompensationCategory === category.id ? 'active' : ''}`}
                       onClick={() => setSelectedCompensationCategory(category.id)}
-                      data-tooltip={category.tooltip}
                     >
                       <div className="category-info">
                         {category.isSpecial ? (
@@ -1484,7 +1524,7 @@ etc.`
                         {header === 'Coduri_Boli' ? (
                           <div className="diseases-cell">
                             {getDiseasesForMedicine(medicine[header]).map((disease, idx) => (
-                              <span key={idx} className="disease-tag" title={`${disease.cod}: ${disease.nume}`}>
+                              <span key={idx} className="disease-tag">
                                 {disease.cod}
                               </span>
                             ))}
@@ -1543,24 +1583,19 @@ etc.`
                 <button 
                   className="add-medicine-button"
                   onClick={openAddMedicineModal}
-                  title="Adaugă medicament personalizat"
                 >
                   ➕
                 </button>
-                {(selectedProducts.length > 0 || (patientNotes && patientNotes.trim() !== '') || (doctorNotes && doctorNotes.trim() !== '')) && (
-                  <button 
-                    className="download-selected-products-button"
-                    onClick={downloadSelectedProducts}
-                    title="Descarcă produsele selectate și notițele în format PDF"
-                  >
-                    📥
-                  </button>
-                )}
+                <button 
+                  className="download-selected-products-button"
+                  onClick={downloadSelectedProducts}
+                >
+                  📥
+                </button>
                 {selectedProducts.length > 0 && (
                   <button 
                     className="clear-selected-products-button"
                     onClick={clearSelectedProducts}
-                    title="Șterge toate produsele selectate"
                   >
                     🗑️
                   </button>
@@ -1596,7 +1631,6 @@ etc.`
                           <button 
                             className="plan-medicine-button"
                             onClick={() => openPlanModal(product)}
-                            title="Creează plan de tratament"
                           >
                             📋 Plan
                           </button>
@@ -1636,7 +1670,6 @@ etc.`
                       <button 
                         className="remove-selected-product-button"
                         onClick={() => removeSelectedProduct(product['Cod medicament'])}
-                        title="Elimină din selecție"
                       >
                         ✕
                       </button>
@@ -1662,7 +1695,13 @@ etc.`
         const filteredValues = getFilteredValues(filterKey)
         
         return (
-          <div key={filterKey} className="filter-modal-overlay" onClick={() => setShowFilters(prev => ({ ...prev, [filterKey]: false }))}>
+          <div key={filterKey} className="filter-modal-overlay" onClick={() => {
+            setShowFilters(prev => ({ ...prev, [filterKey]: false }))
+            setSkipFadeAnimation(true) // Oprește animația pentru revenirea rapidă
+            setTimeout(() => {
+              setShowContextMenu(true)
+            }, 50)
+          }}>
             <div className="filter-modal-section show" onClick={(e) => e.stopPropagation()}>
               <div className="filter-modal-header">
                 <h3>{filterKey}</h3>
@@ -1670,7 +1709,13 @@ etc.`
                   <button className="clear-filters-btn" onClick={() => clearFilters(filterKey)}>
                     Șterge filtrele
                   </button>
-                  <button className="close-filters-btn" onClick={() => setShowFilters(prev => ({ ...prev, [filterKey]: false }))}>
+                  <button className="close-filters-btn" onClick={() => {
+                    setShowFilters(prev => ({ ...prev, [filterKey]: false }))
+                    setSkipFadeAnimation(true) // Oprește animația pentru revenirea rapidă
+                    setTimeout(() => {
+                      setShowContextMenu(true)
+                    }, 50)
+                  }}>
                     ✕
                   </button>
                 </div>
@@ -1720,8 +1765,8 @@ etc.`
 
       {/* Meniu de filtre centrat */}
       {showContextMenu && (
-        <div className="filter-menu-overlay" onClick={handleContextMenuClose}>
-          <div className="filter-menu-modal" onClick={(e) => e.stopPropagation()}>
+        <div className={`filter-menu-overlay ${skipFadeAnimation ? 'no-animation' : ''}`} onClick={handleContextMenuClose}>
+          <div className={`filter-menu-modal ${skipFadeAnimation ? 'no-animation' : ''}`} onClick={(e) => e.stopPropagation()}>
             <div className="filter-menu-header">
               <h3>🔬 Meniu Filtre</h3>
               <button className="filter-menu-close" onClick={handleContextMenuClose}>
@@ -1840,6 +1885,57 @@ etc.`
               </button>
               <button className="add-medicine-save-button" onClick={addCustomMedicine}>
                 Salvează
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmare pentru Pacient nou */}
+      {showNewPatientModal && (
+        <div className="new-patient-modal-overlay" onClick={() => setShowNewPatientModal(false)}>
+          <div className="new-patient-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="new-patient-modal-header">
+              <div className="new-patient-modal-icon">🆕</div>
+              <h3>Pacient nou</h3>
+              <button 
+                className="new-patient-modal-close"
+                onClick={() => setShowNewPatientModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="new-patient-modal-body">
+              <div className="new-patient-modal-warning">
+                <div className="warning-icon">⚠️</div>
+                <h4>Ești sigur că vrei să începi cu un pacient nou?</h4>
+                <p>Această acțiune va șterge:</p>
+                <ul className="warning-list">
+                  <li>📝 Indicațiile pacientului</li>
+                  <li>👨‍⚕️ Indicațiile medicului</li>
+                  <li>💊 Medicamentele selectate</li>
+                  <li>📋 Planurile de tratament</li>
+                  <li>🤖 Sfaturile AI generate</li>
+                </ul>
+                <p className="warning-note">
+                  <strong>Toate datele vor fi șterse permanent și nu vor putea fi recuperate!</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="new-patient-modal-footer">
+              <button 
+                className="new-patient-cancel-button"
+                onClick={() => setShowNewPatientModal(false)}
+              >
+                Anulează
+              </button>
+              <button 
+                className="new-patient-confirm-button"
+                onClick={clearAllPatientData}
+              >
+                🆕 Da, începe cu pacient nou
               </button>
             </div>
           </div>
@@ -2165,40 +2261,6 @@ const PlanModal = ({ medicine, onClose, onSave, existingPlan }) => {
         </div>
       </div>
 
-      {/* Modal pentru pacient nou */}
-      {showNewPatientModal && (
-        <div className="new-patient-modal-overlay" onClick={closeNewPatientModal}>
-          <div className="new-patient-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="new-patient-modal-header">
-              <h3>👤 Pacient Nou</h3>
-              <button className="new-patient-modal-close" onClick={closeNewPatientModal}>✕</button>
-            </div>
-            
-            <div className="new-patient-modal-body">
-              <div className="new-patient-warning">
-                <p>⚠️ Atenție! Această acțiune va șterge toate datele curente:</p>
-                <ul>
-                  <li>Medicamentele selectate</li>
-                  <li>Notițele pacientului</li>
-                  <li>Notițele medicului</li>
-                  <li>Planurile de tratament</li>
-                  <li>Sfaturile AI</li>
-                </ul>
-                <p>Ești sigur că vrei să continui?</p>
-              </div>
-            </div>
-
-            <div className="new-patient-modal-footer">
-              <button className="new-patient-cancel-button" onClick={closeNewPatientModal}>
-                Anulează
-              </button>
-              <button className="new-patient-confirm-button" onClick={handleNewPatient}>
-                Confirmă
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
