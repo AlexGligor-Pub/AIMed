@@ -30,6 +30,7 @@ const MedicinesTable = ({ ageCategory = 'toate', ageCategoryData = null, ageCate
   const [medicinePlans, setMedicinePlans] = useState({})
   const [showAddMedicineModal, setShowAddMedicineModal] = useState(false)
   const [newMedicineName, setNewMedicineName] = useState('')
+  const [showNewPatientModal, setShowNewPatientModal] = useState(false)
 
   // Primele 4 coloane afișate implicit (fără Coduri_Boli)
   const defaultVisibleColumns = [
@@ -1006,6 +1007,43 @@ Programează o consultație dacă simptomele persistă`
 
   const allColumns = getAllColumns()
 
+  // Funcții pentru gestionarea pacientului nou
+  const openNewPatientModal = useCallback(() => {
+    console.log('🔍 openNewPatientModal apelată!')
+    console.log('🔍 showNewPatientModal înainte:', showNewPatientModal)
+    setShowNewPatientModal(true)
+    console.log('🔍 showNewPatientModal după:', true)
+  }, [showNewPatientModal])
+
+  const closeNewPatientModal = useCallback(() => {
+    console.log('🔍 closeNewPatientModal apelată!')
+    setShowNewPatientModal(false)
+  }, [])
+
+  const handleNewPatient = useCallback(() => {
+    // Șterge toate datele curente din state
+    setSelectedProducts([])
+    setPatientNotes('')
+    setDoctorNotes('')
+    setAiAdvice([])
+    setMedicinePlans({})
+    
+    // Șterge toate datele din localStorage
+    localStorage.removeItem('selectedProducts')
+    localStorage.removeItem('patientNotes')
+    localStorage.removeItem('doctorNotes')
+    localStorage.removeItem('aiAdvice')
+    localStorage.removeItem('medicinePlans')
+    
+    // Închide modalul
+    closeNewPatientModal()
+  }, [closeNewPatientModal])
+
+  // Monitorizează schimbările în showNewPatientModal
+  useEffect(() => {
+    console.log('🔍 showNewPatientModal s-a schimbat:', showNewPatientModal)
+  }, [showNewPatientModal])
+
   // Loading și Error states DUPĂ toate hook-urile
   if (loading) {
     return (
@@ -1065,6 +1103,21 @@ Programează o consultație dacă simptomele persistă`
           title="Indicații Medic"
         >
           👨‍⚕️ Indicații Medic
+        </button>
+      </div>
+
+      {/* Buton Pacient Nou - Colțul din dreapta sus */}
+      <div className="new-patient-container">
+        <button 
+          className="new-patient-button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔍 Butonul Pacient Nou a fost apăsat!');
+            openNewPatientModal();
+          }}
+        >
+          👤 Pacient Nou
         </button>
       </div>
 
@@ -2106,6 +2159,40 @@ const PlanModal = ({ medicine, onClose, onSave, existingPlan }) => {
         </div>
       </div>
 
+      {/* Modal pentru pacient nou */}
+      {showNewPatientModal && (
+        <div className="new-patient-modal-overlay" onClick={closeNewPatientModal}>
+          <div className="new-patient-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="new-patient-modal-header">
+              <h3>👤 Pacient Nou</h3>
+              <button className="new-patient-modal-close" onClick={closeNewPatientModal}>✕</button>
+            </div>
+            
+            <div className="new-patient-modal-body">
+              <div className="new-patient-warning">
+                <p>⚠️ Atenție! Această acțiune va șterge toate datele curente:</p>
+                <ul>
+                  <li>Medicamentele selectate</li>
+                  <li>Notițele pacientului</li>
+                  <li>Notițele medicului</li>
+                  <li>Planurile de tratament</li>
+                  <li>Sfaturile AI</li>
+                </ul>
+                <p>Ești sigur că vrei să continui?</p>
+              </div>
+            </div>
+
+            <div className="new-patient-modal-footer">
+              <button className="new-patient-cancel-button" onClick={closeNewPatientModal}>
+                Anulează
+              </button>
+              <button className="new-patient-confirm-button" onClick={handleNewPatient}>
+                Confirmă
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

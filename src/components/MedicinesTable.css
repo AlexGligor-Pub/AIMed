@@ -1980,7 +1980,7 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 1000;
+  z-index: 10000;
 }
 
 .patient-notes-button {
@@ -2040,6 +2040,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10001;
 }
 
 .new-patient-button:hover {
