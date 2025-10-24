@@ -2,6 +2,72 @@
   min-height: 100vh;
   width: 100%;
   box-sizing: border-box;
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Professional Header */
+.app-header {
+  background: var(--background-card);
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.logo-emoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: -0.01em;
+}
+
+.search-section {
+  flex: 1;
+  max-width: 400px;
+  margin-left: var(--spacing-xl);
+}
+
+.header-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  background: var(--background-light);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+}
+
+.header-search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(26, 60, 124, 0.1);
+}
+
+.header-search-input::placeholder {
+  color: var(--text-secondary);
+  font-weight: 400;
 }
 
 .counter-page {
@@ -27,14 +93,14 @@
 .counter-label {
   font-size: 4rem;
   font-weight: bold;
-  color: #646cff;
+  color: #1a3c7c;
   padding: 2rem 3rem;
-  border: 3px solid #646cff;
+  border: 3px solid #1a3c7c;
   border-radius: 20px;
-  background: linear-gradient(135deg, rgba(100, 108, 255, 0.1), rgba(100, 108, 255, 0.2));
+  background: linear-gradient(135deg, rgba(26, 60, 124, 0.1), rgba(26, 60, 124, 0.2));
   min-width: 300px;
-  box-shadow: 0 8px 32px rgba(100, 108, 255, 0.3), 
-              0 4px 16px rgba(100, 108, 255, 0.2),
+  box-shadow: 0 8px 32px rgba(26, 60, 124, 0.3), 
+              0 4px 16px rgba(26, 60, 124, 0.2),
               inset 0 1px 0 rgba(255, 255, 255, 0.3);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
@@ -43,36 +109,62 @@
 .increment-button {
   font-size: 1.5rem;
   padding: 1.5rem 3rem;
-  background: linear-gradient(135deg, #646cff, #535bf2);
+  background: linear-gradient(135deg, #1a3c7c, #2c5aa0);
   color: white;
   border: none;
   border-radius: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(100, 108, 255, 0.4),
-              0 3px 10px rgba(100, 108, 255, 0.2);
+  box-shadow: 0 6px 20px rgba(26, 60, 124, 0.4),
+              0 3px 10px rgba(26, 60, 124, 0.2);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   font-weight: bold;
 }
 
 .increment-button:hover {
-  background: linear-gradient(135deg, #535bf2, #4c52d4);
+  background: linear-gradient(135deg, #2c5aa0, #1a3c7c);
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(100, 108, 255, 0.5),
-              0 4px 15px rgba(100, 108, 255, 0.3);
+  box-shadow: 0 8px 25px rgba(26, 60, 124, 0.5),
+              0 4px 15px rgba(26, 60, 124, 0.3);
 }
 
 .increment-button:active {
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(100, 108, 255, 0.4),
-              0 2px 8px rgba(100, 108, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(26, 60, 124, 0.4),
+              0 2px 8px rgba(26, 60, 124, 0.2);
 }
 
 h1 {
-  color: #646cff;
+  color: #1a3c7c;
   margin-bottom: 2rem;
   font-size: 3rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-weight: 300;
   letter-spacing: 1px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: stretch;
+  }
+  
+  .search-section {
+    margin-left: 0;
+    max-width: none;
+  }
+  
+  .logo-emoji {
+    font-size: 1.75rem;
+  }
+  
+  .logo-text {
+    font-size: 1.25rem;
+  }
 }
