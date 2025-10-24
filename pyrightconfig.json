@@ -1,0 +1,32 @@
+{
+  "include": [
+    "public/**/*.py"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "pythonVersion": "3.13",
+  "pythonPlatform": "Windows",
+  "typeCheckingMode": "basic",
+  "useLibraryCodeForTypes": true,
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": false
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

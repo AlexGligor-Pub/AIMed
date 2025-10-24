@@ -1036,7 +1036,7 @@ Programează o consultație dacă simptomele persistă`
           
           ${doctorNotes && doctorNotes.trim() ? `
           <div class="doctor-indications-section">
-            <h2>Indicații Medicului</h2>
+            <h2>Indicații Medic</h2>
             <div class="doctor-indications-content">
               ${doctorNotes}
             </div>
@@ -1578,7 +1578,7 @@ etc.`
         <div className="selected-products-column">
           <div className="selected-products-section">
             <div className="selected-products-header">
-              <h4 className="filter-section-title">Medicamente selectate</h4>
+              <h4 className="filter-section-title">Lista Medicamente</h4>
               <div className="selected-products-header-buttons">
                 <button 
                   className="add-medicine-button"
