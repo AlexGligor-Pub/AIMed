@@ -1981,6 +1981,9 @@
   top: 20px;
   right: 20px;
   z-index: 10000;
+  background: #00ff00 !important;
+  border: 2px solid #000000 !important;
+  padding: 10px;
 }
 
 .patient-notes-button {
@@ -2028,9 +2031,9 @@
 }
 
 .new-patient-button {
-  background: rgba(26, 60, 124, 0.1);
-  color: #1a3c7c;
-  border: 1px solid #1a3c7c;
+  background: #ff0000 !important;
+  color: #ffffff !important;
+  border: 3px solid #000000 !important;
   padding: 12px 20px;
   border-radius: 8px;
   font-size: 14px;
@@ -2043,6 +2046,8 @@
   pointer-events: auto;
   position: relative;
   z-index: 10001;
+  min-width: 150px;
+  min-height: 50px;
 }
 
 .new-patient-button:hover {

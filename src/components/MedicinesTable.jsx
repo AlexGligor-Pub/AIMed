@@ -1107,7 +1107,13 @@ Programează o consultație dacă simptomele persistă`
       </div>
 
       {/* Buton Pacient Nou - Colțul din dreapta sus */}
-      <div className="new-patient-container">
+      <div 
+        className="new-patient-container"
+        onClick={(e) => {
+          console.log('🔍 Container apăsat!');
+          e.stopPropagation();
+        }}
+      >
         <button 
           className="new-patient-button"
           onClick={(e) => {
