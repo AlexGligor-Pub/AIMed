@@ -8,6 +8,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative; /* Pentru poziționarea absolută a butoanelor */
 }
 
 .search-container {
@@ -1965,13 +1966,13 @@
 
 /* Stiluri pentru zona de notițe */
 .notes-buttons-container {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1000;
+  position: absolute;
+  top: var(--spacing-2xl);
+  left: var(--spacing-2xl);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  z-index: 1000;
 }
 
 /* Container pentru butonul de pacient nou */
