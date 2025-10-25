@@ -372,12 +372,28 @@
   flex-direction: column;
 }
 
-/* Înălțime fixă pentru toate tabelele */
-.table-container.items-10,
+/* Înălțime adaptivă pentru tabele - se ajustează la conținut */
+.table-container.items-5,
+.table-container.items-6,
+.table-container.items-7,
+.table-container.items-8,
+.table-container.items-9,
+.table-container.items-10 {
+  height: auto;
+  min-height: 200px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
 .table-container.items-50,
-.table-container.items-100,
-.table-container.items-all {
+.table-container.items-100 {
   height: 100%;
+  overflow-y: auto;
+}
+
+.table-container.items-all {
+  height: auto;
+  max-height: 80vh;
   overflow-y: auto;
 }
 
@@ -1645,7 +1661,7 @@
   /* Responsive pentru modalul de confirmare Pacient nou */
   .new-patient-modal-content {
     width: 95%;
-    max-width: 380px;
+    max-width: 400px;
   }
 
   .new-patient-modal-header {
@@ -2758,10 +2774,10 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  max-width: 420px;
-  width: 85%;
+  max-width: 450px;
+  width: 90%;
   max-height: 80vh;
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(26, 60, 124, 0.1);
@@ -2834,9 +2850,11 @@
 }
 
 .new-patient-modal-body {
-  padding: 1.5rem;
+  padding: 1.25rem;
   flex: 1;
   background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .new-patient-modal-warning {
@@ -2861,16 +2879,17 @@
 .new-patient-modal-warning h4 {
   margin: 0 0 0.75rem 0;
   color: #1f2937;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.3;
 }
 
 .new-patient-modal-warning p {
   margin: 0 0 0.75rem 0;
   color: #6b7280;
-  font-size: 0.95rem;
-  line-height: 1.4;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .warning-list {
@@ -2885,24 +2904,26 @@
 }
 
 .warning-list li {
-  padding: 0.4rem 0;
+  padding: 0.5rem 0;
   color: #374151;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  line-height: 1.4;
 }
 
 .warning-note {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: 8px;
-  padding: 0.75rem;
+  padding: 1rem;
   margin-top: 1rem;
   color: #dc2626;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-weight: 600;
 }
 
 .new-patient-modal-footer {
@@ -2913,6 +2934,8 @@
   gap: 0.75rem;
   background: #ffffff;
   border-radius: 0 0 16px 16px;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 .new-patient-cancel-button {

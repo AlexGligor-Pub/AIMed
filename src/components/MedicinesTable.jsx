@@ -1409,6 +1409,11 @@ etc.`
             onChange={(e) => handleItemsPerPageChange(e.target.value === 'All' ? 'All' : parseInt(e.target.value))}
             className="items-per-page-select"
           >
+            <option value={5}>5</option>
+            <option value={6}>6</option>
+            <option value={7}>7</option>
+            <option value={8}>8</option>
+            <option value={9}>9</option>
             <option value={10}>10</option>
             <option value={50}>50</option>
             <option value={100}>100</option>
